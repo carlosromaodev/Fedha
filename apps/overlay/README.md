@@ -1,6 +1,6 @@
 # @fedha/overlay
 
-Aplicação separada e leve que serve os links de overlay. Não é uma rota do painel React: corre durante horas nos navegadores embutidos do OBS, Streamlabs, TikTok LIVE Studio e PRISM, por isso não usa dependências pesadas.
+Aplicação separada e leve que serve os links de overlay. Não é uma rota do painel React: corre durante horas nos navegadores embutidos do OBS, Streamlabs, TikTok LIVE Studio, PRISM e CameraFi Live, por isso não usa dependências pesadas.
 
 URL: `/o/<token>?layout=h|v` (token secreto e revogável pelo streamer).
 
@@ -15,6 +15,8 @@ URL: `/o/<token>?layout=h|v` (token secreto e revogável pelo streamer).
 ## Estrutura
 - `src/runtime/`: ligação em tempo real, reconexão, fila local, ack.
 - `src/audio/`: reprodução do áudio gerado no servidor.
-- `src/widgets/`: W1–W5.
+- `src/widgets/`: W1–W6 (W6 Combinado = alerta + meta numa só camada).
+
+As telas e animações dos widgets vêm do prompt https://claude.ai/artifact/GSZucccXJnoPUgJV5XxrKW (Claude Design). Até lá, só o runtime.
 
 Contrato: `docs/outputs/README.md`. Estratégia: https://claude.ai/artifact/916qoRFhGb3XDAugvVSwaa

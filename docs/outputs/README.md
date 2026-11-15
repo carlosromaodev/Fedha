@@ -20,6 +20,8 @@ Regra: o streamer escolhe o modo (`OutputMode`). A mesma mensagem nunca toca nas
 | PC + OBS / Streamlabs | Sim | Browser Source |
 | PC + TikTok LIVE Studio | Sim | Link Source (bug 0×0: contorno com OBS Virtual Camera) |
 | Telemóvel + PRISM | Sim | Widget Web |
+| Telemóvel + CameraFi Live | Sim | Overlay web |
+| TikTok por partilha de ecrã | Parcial (experimental) | Página Fedha aberta no ecrã |
 | Telemóvel, app nativa TikTok / Instagram / YouTube | Não | Player só-áudio |
 
 Estratégia completa: https://claude.ai/artifact/916qoRFhGb3XDAugvVSwaa
