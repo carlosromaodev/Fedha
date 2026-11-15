@@ -2,7 +2,7 @@ import type { FastifyInstance } from "fastify";
 import type { ZodTypeProvider } from "fastify-type-provider-zod";
 import { z } from "zod";
 import { eq } from "drizzle-orm";
-import { OverlayClientMessage } from "@fedha/contracts";
+import { OverlayClientMessage, WIDGET_BY_ID, WidgetId } from "@fedha/contracts";
 import type { Ctx } from "../../../shared/context";
 import { schema } from "../../../shared/database/client";
 import type { OutputKind } from "../../../shared/realtime/hub";
@@ -11,7 +11,7 @@ import { streamerById, streamerByUser } from "../../streamers/application/stream
 import { assertAssistantOf } from "../../assistants/application/assistants.service";
 import { snapshot, outputsStatus } from "../../queue/application/queue.service";
 import * as playback from "../application/playback.service";
-import { widgetConfig } from "../application/widgets.service";
+import { toWire, widgetConfig } from "../application/widgets.service";
 
 export async function realtimeRoutes(app: FastifyInstance, ctx: Ctx) {
   const r = app.withTypeProvider<ZodTypeProvider>();
@@ -27,18 +27,23 @@ export async function realtimeRoutes(app: FastifyInstance, ctx: Ctx) {
    * Servidor → hello, alert, settings, goal, ranking, latest, pong. Cliente → started, ack, error, ping.
    */
   app.get("/v1/realtime/overlay", { websocket: true }, async (socket, req) => {
-    const q = req.query as { token?: string; layout?: string };
+    const q = req.query as { token?: string; layout?: string; w?: string };
     const row = q.token ? await ctx.db.query.widgetTokens.findFirst({ where: eq(schema.widgetTokens.token, q.token) }) : null;
     if (!row || row.revokedAt) { socket.close(4001, "token inválido"); return; }
     const s = await streamerById(ctx, row.streamerId);
     if (s.status !== "active") { socket.close(4003, "conta suspensa"); return; }
     await ctx.db.update(schema.widgetTokens).set({ lastSeenAt: ctx.now() }).where(eq(schema.widgetTokens.id, row.id));
 
+    // ?w=1..6 escolhe o widget (o mesmo link do streamer pode abrir W1 ou W6, por exemplo).
+    const wId = WidgetId.safeParse(q.w ? `w${q.w}` : "");
+    const kind = (row.kind !== "player" && wId.success ? WIDGET_BY_ID[wId.data] : row.kind) as OutputKind;
     const conn = ctx.hub.addOutput({
-      streamerId: s.id, kind: row.kind as OutputKind, tokenId: row.id, layout: q.layout ?? null,
+      streamerId: s.id, kind, tokenId: row.id, layout: q.layout ?? null,
       userAgent: (req.headers["user-agent"] as string) ?? null, ip: req.ip ?? null, socket,
     });
-    ctx.hub.sendTo(conn, "hello", { connectionId: conn.id, kind: row.kind, config: widgetConfig(row), enabled: row.enabled, volume: s.volume });
+    ctx.hub.sendTo(conn, "hello", { connectionId: conn.id, kind, config: widgetConfig(row), enabled: row.enabled, volume: s.volume });
+    const enabled = row.enabled && !(kind === "qr" && (s.platform === "tiktok" || s.platform === "instagram"));
+    ctx.hub.sendTo(conn, "config", toWire(widgetConfig(row), enabled, s));
     void playback.pushWidgetData(ctx, s.id, conn);
     void playback.engine(ctx).pump(s.id);
 
@@ -50,6 +55,11 @@ export async function realtimeRoutes(app: FastifyInstance, ctx: Ctx) {
       else if (msg.type === "ack") await playback.engine(ctx).ack(conn, msg.data.id);
       else if (msg.type === "started") await playback.engine(ctx).started(conn, msg.data.id);
       else if (msg.type === "error") await playback.engine(ctx).onError(conn, msg.data.id, msg.data.reason);
+      else if (msg.type === "hello") {
+        conn.scenario = msg.data?.scenario ?? null;
+        if (msg.data?.userAgent && !conn.userAgent) conn.userAgent = msg.data.userAgent;
+        ctx.hub.onOutputsChanged(s.id);
+      }
     });
     socket.on("close", async () => {
       ctx.hub.removeOutput(conn.id);
@@ -60,11 +70,11 @@ export async function realtimeRoutes(app: FastifyInstance, ctx: Ctx) {
 
   /** WebSocket do painel (S1/S2) e do assistente: fila em tempo real e estado das saídas. */
   app.get("/v1/realtime/dashboard", { websocket: true }, async (socket, req) => {
-    const q = req.query as { access_token?: string; streamerId?: string };
+    const q = req.query as { access_token?: string; token?: string; streamerId?: string };
     let streamerId: string;
     let userId: string;
     try {
-      const { user } = await authenticate(ctx, q.access_token ?? "");
+      const { user } = await authenticate(ctx, q.access_token ?? q.token ?? "");
       userId = user.id;
       if (user.role === "streamer") streamerId = (await streamerByUser(ctx, user.id))!.id;
       else if (user.role === "assistant" && q.streamerId) streamerId = (await assertAssistantOf(ctx, user.id, q.streamerId)).id;

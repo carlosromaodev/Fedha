@@ -34,6 +34,8 @@ interface StreamerState {
  */
 export class PlaybackEngine {
   private states = new Map<string, StreamerState>();
+  /** Último alerta de teste por streamer (GET /v1/widgets/last-test). */
+  readonly lastTests = new Map<string, { id: string; sentAt: string; pageOpen: boolean; played: boolean }>();
   constructor(private ctx: Ctx) {}
 
   private state(id: string): StreamerState {
@@ -88,6 +90,7 @@ export class PlaybackEngine {
     const upd = await this.ctx.db.update(schema.orders).set({ status: "playing", startedAt: now })
       .where(and(eq(schema.orders.id, next.id), eq(schema.orders.status, "queued"))).returning({ id: schema.orders.id });
     if (upd.length === 0) { st.again = true; return; }
+    const voice = next.voiceId ? await this.ctx.db.query.voices.findFirst({ where: eq(schema.voices.id, next.voiceId) }) : null;
     const effect = next.effectId ? await this.ctx.db.query.soundEffects.findFirst({ where: eq(schema.soundEffects.id, next.effectId) }) : null;
     const alert: AlertEvent = {
       id: next.id,
@@ -102,6 +105,7 @@ export class PlaybackEngine {
       createdAt: (next.paidAt ?? next.createdAt).toISOString(),
       effectUrl: effect?.storageKey ? this.ctx.storage.publicUrl(effect.storageKey) : null,
       voiceId: next.voiceId,
+      voice: voice?.name ?? null,
       priority: next.priority,
       ...decorate(next.amount, cfg),
     };
@@ -136,6 +140,8 @@ export class PlaybackEngine {
     st.playing = null;
     const s = await streamerById(this.ctx, conn.streamerId);
     st.nextAt = Date.now() + s.intervalSeconds * 1000;
+    const t = this.lastTests.get(conn.streamerId);
+    if (t && t.id === id) t.played = true;
     if (p.orderId) {
       const now = this.ctx.now();
       const o = await this.ctx.db.query.orders.findFirst({ where: eq(schema.orders.id, p.orderId) });

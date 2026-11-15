@@ -1,5 +1,5 @@
 import { and, desc, eq, gte, inArray, sql } from "drizzle-orm";
-import type { AlertEvent, OverlayBootstrap, WidgetKind } from "@fedha/contracts";
+import type { AlertEvent, LastTest, OverlayBootstrap, OverlayState, WidgetKind } from "@fedha/contracts";
 import { schema } from "../../../shared/database/client";
 import type { Ctx } from "../../../shared/context";
 import { conflict, notFound } from "../../../shared/errors/app-error";
@@ -12,7 +12,7 @@ import { streamerById, type Streamer } from "../../streamers/application/streame
 import { activeGoal } from "../../goals/application/goals.service";
 import { publishSnapshot } from "../../queue/application/queue.service";
 import type { PlaybackEngine } from "./engine";
-import { tokenRow, widgetConfig, widgetUrl } from "./widgets.service";
+import { toWire, tokenRow, widgetConfig, widgetUrl } from "./widgets.service";
 
 const engines = new WeakMap<Ctx, PlaybackEngine>();
 export const setEngine = (ctx: Ctx, e: PlaybackEngine) => engines.set(ctx, e);
@@ -59,6 +59,7 @@ export async function testAlert(ctx: Ctx, s: Streamer, actor: { id: string; type
     durationMs: r.durationMs, showAmount: true, createdAt: ctx.now().toISOString(), isTest: true,
   };
   const targets = ctx.hub.outputsOf(s.id, engine(ctx).targetKinds(s.outputMode));
+  engine(ctx).lastTests.set(s.id, { id: alert.id, sentAt: ctx.now().toISOString(), pageOpen: targets.length > 0, played: false });
   // Sem saída ligada, o teste não fica guardado (não faz sentido tocar mais tarde).
   if (targets.length) engine(ctx).enqueueExtra(s.id, alert);
   await audit(ctx, { actorId: actor.id, actorType: actor.type, action: "playback.test_alert", streamerId: s.id });
@@ -85,6 +86,7 @@ export async function setVolume(ctx: Ctx, s: Streamer, volume: number, actor: { 
   for (const c of ctx.hub.outputsOf(s.id)) {
     const row = c.tokenId ? await ctx.db.query.widgetTokens.findFirst({ where: eq(schema.widgetTokens.id, c.tokenId) }) : null;
     ctx.hub.sendTo(c, "settings", { config: row ? widgetConfig(row) : {}, enabled: row?.enabled ?? true, volume });
+    if (row) ctx.hub.sendTo(c, "config", { ...toWire(widgetConfig(row), row.enabled, s), volume: volume / 100 });
   }
   await audit(ctx, { actorId: actor.id, actorType: actor.type, action: "playback.volume", streamerId: s.id, data: { volume } });
   await publishSnapshot(ctx, s.id);
@@ -107,9 +109,36 @@ export async function latest(ctx: Ctx, streamerId: string, count: number) {
   return rows.map((o) => ({ id: o.id, donorName: o.donorName, text: o.kind === "text" ? o.text : null, kind: o.kind as "text" | "audio", amount: o.amount, at: (o.playedAt ?? o.createdAt).toISOString() }));
 }
 
-/** Envia os dados atuais aos widgets de meta, ranking, últimas e combinado. */
+export function lastTest(ctx: Ctx, streamerId: string): LastTest {
+  const t = engine(ctx).lastTests.get(streamerId);
+  return t ? { sentAt: t.sentAt, pageOpen: t.pageOpen, played: t.played } : { sentAt: null, pageOpen: false, played: false };
+}
+
+/** Estado no formato do overlay: meta, ranking, últimas mensagens e tamanho da fila. */
+export async function overlayState(ctx: Ctx, streamerId: string, cfg?: { rankingPeriod?: "live" | "day" | "month"; rankingSize?: number; latestCount?: number }): Promise<OverlayState> {
+  const goal = await activeGoal(ctx, streamerId);
+  const [rk, lt, q] = [
+    await ranking(ctx, streamerId, cfg?.rankingPeriod ?? "live", cfg?.rankingSize ?? 5),
+    await latest(ctx, streamerId, cfg?.latestCount ?? 5),
+    await ctx.db.select({ n: sql<string>`count(*)` }).from(schema.orders).where(and(eq(schema.orders.streamerId, streamerId), inArray(schema.orders.status, ["queued", "playing"]))),
+  ];
+  return {
+    goal: goal ? { title: goal.title, current: goal.current, target: goal.target } : null,
+    ranking: rk.map((r) => ({ name: r.donorName, kz: r.total })),
+    latest: lt.map((m) => ({ name: m.donorName, kz: m.amount, text: m.text ?? "Mensagem de voz" })),
+    queueSize: Number(q[0]?.n ?? 0),
+  };
+}
+
+/** Envia os dados atuais aos widgets (mensagem "state" a todos; goal/ranking/latest aos respetivos). */
 export async function pushWidgetData(ctx: Ctx, streamerId: string, only?: OutputConnection) {
-  const conns = only ? [only] : ctx.hub.outputsOf(streamerId, ["goal", "ranking", "latest", "combined"]);
+  const all = only ? [only] : ctx.hub.outputsOf(streamerId, ["overlay", "goal", "ranking", "latest", "qr", "combined"]);
+  if (all.length === 0) return;
+  for (const c of all) {
+    const row = c.tokenId ? await ctx.db.query.widgetTokens.findFirst({ where: eq(schema.widgetTokens.id, c.tokenId) }) : null;
+    ctx.hub.sendTo(c, "state", await overlayState(ctx, streamerId, row ? widgetConfig(row) : undefined));
+  }
+  const conns = all.filter((c) => ["goal", "ranking", "latest", "combined"].includes(c.kind));
   if (conns.length === 0) return;
   const goal = await activeGoal(ctx, streamerId);
   for (const c of conns) {

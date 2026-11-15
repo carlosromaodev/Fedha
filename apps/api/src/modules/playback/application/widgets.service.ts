@@ -1,5 +1,9 @@
 import { and, eq, isNull } from "drizzle-orm";
-import { WIDGET_CODE, WidgetConfig, type WidgetKind, type WidgetView } from "@fedha/contracts";
+import {
+  ID_BY_WIDGET, WIDGET_BY_ID, WIDGET_CODE, WidgetConfig, Destination,
+  type OverlayWireConfig, type UpdateWireConfig, type WidgetId, type WidgetKind, type WidgetSummary, type WidgetView,
+} from "@fedha/contracts";
+import type { z } from "zod";
 import { schema } from "../../../shared/database/client";
 import type { Ctx } from "../../../shared/context";
 import { notFound } from "../../../shared/errors/app-error";
@@ -13,7 +17,8 @@ type TokenRow = typeof schema.widgetTokens.$inferSelect;
 
 export function widgetUrl(ctx: Ctx, kind: WidgetKind, token: string) {
   const base = (kind === "player" ? ctx.env.PUBLIC_WEB_URL : ctx.env.PUBLIC_OVERLAY_URL ?? ctx.env.PUBLIC_WEB_URL).replace(/\/$/, "");
-  return kind === "player" ? `${base}/player/${token}` : `${base}/o/${token}`;
+  const id = ID_BY_WIDGET[kind];
+  return kind === "player" ? `${base}/player/${token}` : `${base}/o/${token}${id ? `?w=${id.slice(1)}` : ""}`;
 }
 
 /** Cria (uma vez) um token ativo por widget. */
@@ -93,7 +98,12 @@ export async function updateWidget(ctx: Ctx, s: Streamer, kind: WidgetKind, inpu
   const enabled = input.enabled ?? row.enabled;
   await ctx.db.update(schema.widgetTokens).set({ config, enabled }).where(eq(schema.widgetTokens.id, row.id));
   await audit(ctx, { actorId, actorType: "streamer", action: "widget.updated", targetType: "widget", targetId: kind, streamerId: s.id });
-  for (const c of ctx.hub.outputsOf(s.id, [kind])) ctx.hub.sendTo(c, "settings", { config, enabled, volume: s.volume });
+  const wire = toWire(config, enabled, s);
+  for (const c of ctx.hub.outputsOf(s.id)) {
+    if (c.tokenId !== row.id) continue;
+    ctx.hub.sendTo(c, "settings", { config, enabled, volume: s.volume });
+    ctx.hub.sendTo(c, "config", wire);
+  }
   return config;
 }
 
@@ -107,4 +117,68 @@ export async function regenerateWidget(ctx: Ctx, s: Streamer, kind: WidgetKind, 
   await ctx.db.insert(schema.widgetTokens).values({ id: uuid(), streamerId: s.id, kind, token, enabled: old.enabled, config: old.config, createdAt: ctx.now() });
   await audit(ctx, { actorId, actorType: "streamer", action: "widget.regenerated", targetType: "widget", targetId: kind, streamerId: s.id });
   return widgetUrl(ctx, kind, token);
+}
+
+// ------------------------------------------------------------- formato do overlay (apps/overlay)
+const tierMin = (cfg: WidgetConfig, tier: "destaque" | "super", dflt: number) => cfg.tiers.find((t) => t.tier === tier)?.minAmount ?? dflt;
+
+/** WidgetConfig → configuração com os nomes que o overlay usa. */
+export function toWire(cfg: WidgetConfig, enabled: boolean, s: Pick<Streamer, "handle" | "platform">): OverlayWireConfig {
+  const dest = Destination.safeParse(s.platform);
+  return {
+    theme: cfg.theme, accent: cfg.accent, size: cfg.size, showName: cfg.showName, showValue: cfg.showAmount,
+    karaoke: cfg.karaoke, reduceMotion: cfg.reduceMotion,
+    highlightFrom: tierMin(cfg, "destaque", 1000), superFrom: tierMin(cfg, "super", 5000),
+    enterMs: cfg.enterMs, exitMs: cfg.exitMs, gapMs: cfg.gapMs, volume: cfg.volume / 100,
+    destination: dest.success ? dest.data : "tiktok", qrCall: cfg.qrCallToAction, handle: s.handle, enabled,
+  };
+}
+
+/** Configuração no formato do overlay → alterações ao WidgetConfig. */
+export function fromWire(cur: WidgetConfig, w: z.infer<typeof UpdateWireConfig>): { config: WidgetConfig; enabled?: boolean } {
+  const next: WidgetConfig = { ...cur, tiers: cur.tiers.map((t) => ({ ...t })) };
+  if (w.theme !== undefined) next.theme = w.theme;
+  if (w.accent !== undefined) next.accent = w.accent;
+  if (w.size !== undefined) next.size = w.size;
+  if (w.showName !== undefined) next.showName = w.showName;
+  if (w.showValue !== undefined) next.showAmount = w.showValue;
+  if (w.karaoke !== undefined) next.karaoke = w.karaoke;
+  if (w.reduceMotion !== undefined) next.reduceMotion = w.reduceMotion;
+  if (w.enterMs !== undefined) next.enterMs = w.enterMs;
+  if (w.exitMs !== undefined) next.exitMs = w.exitMs;
+  if (w.gapMs !== undefined) next.gapMs = w.gapMs;
+  if (w.volume !== undefined) next.volume = Math.round(w.volume * 100);
+  if (w.qrCall !== undefined) next.qrCallToAction = w.qrCall;
+  const setTier = (tier: "destaque" | "super", v: number) => {
+    const t = next.tiers.find((x) => x.tier === tier);
+    if (t) t.minAmount = v; else next.tiers.push({ tier, minAmount: v, sound: null, minDisplayMs: tier === "super" ? 12000 : 8000 });
+  };
+  if (w.highlightFrom !== undefined) setTier("destaque", w.highlightFrom);
+  if (w.superFrom !== undefined) setTier("super", w.superFrom);
+  return { config: WidgetConfig.parse(next), enabled: w.enabled };
+}
+
+export const kindOfId = (id: WidgetId) => WIDGET_BY_ID[id];
+
+/** Lista W1–W6 para o painel: token, estado da ligação, onde está aberto e configuração. */
+export async function widgetSummaries(ctx: Ctx, s: Streamer): Promise<WidgetSummary[]> {
+  const views = await widgetsView(ctx, s);
+  const rows = await ensureWidgets(ctx, s.id);
+  const out: WidgetSummary[] = [];
+  for (const v of views) {
+    const id = ID_BY_WIDGET[v.kind];
+    if (!id) continue;
+    const row = rows.find((r) => r.kind === v.kind)!;
+    const conns = ctx.hub.outputsOf(s.id, [v.kind]);
+    const where = conns.length
+      ? [...new Set(conns.map((c) => [c.scenario?.toUpperCase(), appFromUserAgent(c.userAgent)].filter(Boolean).join(" · ")))].join(", ")
+      : null;
+    out.push({
+      id, token: row.token, url: v.url,
+      conn: conns.length ? "aberto" : ctx.hub.closedRecently(s.id, v.kind) ? "a_religar" : "fechado",
+      where, openCount: conns.length, warning: v.warning, blocked: v.blocked, blockedReason: v.blockedReason,
+      config: toWire(v.config, v.enabled, s),
+    });
+  }
+  return out;
 }

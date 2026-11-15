@@ -16,7 +16,7 @@ interface Charge {
  * Números de teste (Multicaixa Express, Unitel Money, Afrimoney):
  * - termina em 000 → recusado
  * - termina em 999 → fica pendente até expirar
- * - qualquer outro → confirmado ao fim de SANDBOX_AUTO_CONFIRM_MS
+ * - qualquer outro → confirmado ao fim de SANDBOX_AUTO_CONFIRM_MS (0 = só com confirmação manual)
  * Referência e cartão: só confirmam com POST /v1/sandbox/payments/:id/confirm.
  */
 export class SandboxGateway implements PaymentGateway {

@@ -33,6 +33,7 @@ import { authRoutes } from "./modules/auth/http/auth.routes";
 import { streamerRoutes } from "./modules/streamers/http/streamer.routes";
 import { assistantRoutes } from "./modules/assistants/http/assistant.routes";
 import { realtimeRoutes } from "./modules/playback/http/realtime.routes";
+import { widgetRoutes } from "./modules/playback/http/widgets.routes";
 import { adminRoutes } from "./modules/admin/http/admin.routes";
 
 export interface BuildOptions {
@@ -113,6 +114,7 @@ export async function buildApp(opts: BuildOptions = {}): Promise<{ app: FastifyI
   await streamerRoutes(app, ctx);
   await assistantRoutes(app, ctx);
   await realtimeRoutes(app, ctx);
+  await widgetRoutes(app, ctx);
   await adminRoutes(app, ctx);
 
   await seedCatalog(ctx);

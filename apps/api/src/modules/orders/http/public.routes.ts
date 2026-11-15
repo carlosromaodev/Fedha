@@ -78,6 +78,14 @@ export async function publicRoutes(app: FastifyInstance, ctx: Ctx) {
     schema: { params: Handle, body: CreateOrderBody },
     config: { rateLimit: { max: 20, timeWindow: "1 minute" } },
   }, async (req, reply) => reply.status(201).send(await orders.createOrder(ctx, req.params.handle, req.body, ipOf(req))));
+  /** O mesmo, com o handle no corpo (usado pelo painel e pelos testes do overlay). */
+  r.post("/v1/public/orders", {
+    schema: { body: CreateOrderBody.extend({ handle: z.string().trim().toLowerCase() }) },
+    config: { rateLimit: { max: 20, timeWindow: "1 minute" } },
+  }, async (req, reply) => {
+    const { handle, ...body } = req.body;
+    return reply.status(201).send(await orders.createOrder(ctx, handle, body, ipOf(req)));
+  });
 
   // ----------------------------------------------------------- áudio gravado (F2)
   r.post("/v1/public/audio-uploads", { config: { rateLimit: { max: 10, timeWindow: "1 minute" } } }, async (req, reply) => {

@@ -11,6 +11,8 @@ export interface OutputConnection {
   layout: string | null;
   userAgent: string | null;
   ip: string | null;
+  /** Cenário indicado pelo overlay na mensagem hello (c1–c4). */
+  scenario?: string | null;
   connectedAt: Date;
   lastPingAt: Date;
   socket: WebSocket;
@@ -30,6 +32,8 @@ export class RealtimeHub {
   private outputs = new Map<string, OutputConnection>();
   private dashboards = new Map<string, DashboardConnection>();
   private orderListeners = new Map<string, Set<OrderListener>>();
+  /** Última vez que uma saída de cada widget fechou (para o estado "a religar"). */
+  private lastClosed = new Map<string, number>();
   onOutputsChanged: (streamerId: string) => void = () => {};
 
   addOutput(c: Omit<OutputConnection, "id" | "connectedAt" | "lastPingAt">): OutputConnection {
@@ -42,6 +46,7 @@ export class RealtimeHub {
     const c = this.outputs.get(id);
     if (!c) return;
     this.outputs.delete(id);
+    this.lastClosed.set(`${c.streamerId}:${c.kind}`, Date.now());
     this.onOutputsChanged(c.streamerId);
   }
   getOutput(id: string) {
@@ -50,9 +55,16 @@ export class RealtimeHub {
   outputsOf(streamerId: string, kinds?: OutputKind[]): OutputConnection[] {
     return [...this.outputs.values()].filter((c) => c.streamerId === streamerId && (!kinds || kinds.includes(c.kind)));
   }
-  /** Fecha as ligações de um token revogado. */
+  closedRecently(streamerId: string, kind: OutputKind, withinMs = 30_000) {
+    const t = this.lastClosed.get(`${streamerId}:${kind}`);
+    return t !== undefined && Date.now() - t < withinMs;
+  }
+  /** Avisa ("revoked") e fecha as ligações de um token revogado. */
   dropToken(tokenId: string) {
-    for (const c of this.outputs.values()) if (c.tokenId === tokenId) c.socket.close(4001, "token revogado");
+    for (const c of this.outputs.values()) if (c.tokenId === tokenId) {
+      safeSend(c.socket, { type: "revoked", data: {} });
+      c.socket.close(4001, "token revogado");
+    }
   }
 
   sendTo(conn: OutputConnection, type: string, data: unknown) {

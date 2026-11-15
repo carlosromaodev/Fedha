@@ -390,6 +390,8 @@ CREATE TABLE IF NOT EXISTS "widget_tokens" (
 	"streamer_id" text NOT NULL,
 	"kind" text NOT NULL,
 	"token" text NOT NULL,
+	"enabled" boolean DEFAULT true NOT NULL,
+	"config" jsonb DEFAULT '{}'::jsonb NOT NULL,
 	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
 	"revoked_at" timestamp with time zone,
 	"last_seen_at" timestamp with time zone

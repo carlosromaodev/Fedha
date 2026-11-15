@@ -21,6 +21,8 @@ export const AlertEvent = z.object({
   effectUrl: z.string().url().nullable().optional(),
   tier: AlertTier.optional(),
   voiceId: z.string().nullable().optional(),
+  /** Nome da voz (ex.: "Nzinga"). */
+  voice: z.string().nullable().optional(),
   priority: z.boolean().optional(),
   /** Alerta de teste (não conta para nada). */
   isTest: z.boolean().optional(),
@@ -30,7 +32,7 @@ export const AlertEvent = z.object({
 export type AlertEvent = z.infer<typeof AlertEvent>;
 
 /** Enviado pela saída quando o áudio acaba. Só então a mensagem passa a "tocada". */
-export const AlertAck = z.object({ id: z.string(), playedAt: z.string().datetime() });
+export const AlertAck = z.object({ id: z.string(), playedAt: z.string().optional() });
 export type AlertAck = z.infer<typeof AlertAck>;
 
 export const OutputMode = z.enum(["overlay", "audio_only"]);

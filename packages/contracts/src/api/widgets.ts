@@ -36,8 +36,8 @@ export const WidgetConfig = z.object({
   entrySound: z.string().nullable().default(null),
   tiers: z.array(TierRule).default([
     { tier: "normal", minAmount: 0, sound: null, minDisplayMs: 5000 },
-    { tier: "destaque", minAmount: 2000, sound: null, minDisplayMs: 8000 },
-    { tier: "super", minAmount: 10000, sound: null, minDisplayMs: 12000 },
+    { tier: "destaque", minAmount: 1000, sound: null, minDisplayMs: 8000 },
+    { tier: "super", minAmount: 5000, sound: null, minDisplayMs: 12000 },
   ]),
   /** W3: período do ranking. */
   rankingPeriod: z.enum(["live", "day", "month"]).default("live"),
@@ -45,7 +45,17 @@ export const WidgetConfig = z.object({
   /** W4: quantas mensagens mostrar. */
   latestCount: z.number().int().min(1).max(10).default(5),
   /** W5: texto de chamada. */
-  qrCallToAction: z.string().max(60).default("Manda a tua mensagem"),
+  qrCallToAction: z.string().max(60).default("Manda a tua mensagem!"),
+  /** Cor de destaque do overlay (#RRGGBB). */
+  accent: z.string().regex(/^#[0-9a-fA-F]{6}$/).default("#C9F25C"),
+  /** Tamanho: p pequeno, m médio, g grande. */
+  size: z.enum(["p", "m", "g"]).default("m"),
+  /** Texto acompanha a voz palavra a palavra. */
+  karaoke: z.boolean().default(true),
+  /** Regras de tempo (AN0): entrada 400–700 ms, saída 300–500 ms, intervalo 0–5 s. */
+  enterMs: z.number().int().min(400).max(700).default(500),
+  exitMs: z.number().int().min(300).max(500).default(400),
+  gapMs: z.number().int().min(0).max(5000).default(1500),
 });
 export type WidgetConfig = z.infer<typeof WidgetConfig>;
 export const UpdateWidgetBody = z.object({ enabled: z.boolean().optional(), config: WidgetConfig.partial().optional() });
@@ -96,3 +106,67 @@ export const OverlayBootstrap = z.object({
   wsUrl: z.string(),
 });
 export type OverlayBootstrap = z.infer<typeof OverlayBootstrap>;
+
+/** Identificadores curtos usados pelo painel e pelo overlay (?w=1..6). */
+export const WidgetId = z.enum(["w1", "w2", "w3", "w4", "w5", "w6"]);
+export type WidgetId = z.infer<typeof WidgetId>;
+export const WIDGET_BY_ID: Record<WidgetId, WidgetKind> = { w1: "overlay", w2: "goal", w3: "ranking", w4: "latest", w5: "qr", w6: "combined" };
+export const ID_BY_WIDGET: Partial<Record<WidgetKind, WidgetId>> = { overlay: "w1", goal: "w2", ranking: "w3", latest: "w4", qr: "w5", combined: "w6" };
+
+export const Destination = z.enum(["tiktok", "instagram", "youtube", "twitch", "kick", "facebook"]);
+export type Destination = z.infer<typeof Destination>;
+
+/**
+ * Configuração tal como o overlay a usa (mensagem WS "config" e GET/PUT /v1/widgets).
+ * Os nomes seguem apps/overlay/src/config.ts. volume vai de 0 a 1.
+ */
+export const OverlayWireConfig = z.object({
+  theme: WidgetTheme,
+  accent: z.string().regex(/^#[0-9a-fA-F]{6}$/),
+  size: z.enum(["p", "m", "g"]),
+  showName: z.boolean(),
+  showValue: z.boolean(),
+  karaoke: z.boolean(),
+  reduceMotion: z.boolean(),
+  highlightFrom: Kz,
+  superFrom: Kz,
+  enterMs: z.number().int().min(400).max(700),
+  exitMs: z.number().int().min(300).max(500),
+  gapMs: z.number().int().min(0).max(5000),
+  volume: z.number().min(0).max(1),
+  destination: Destination,
+  qrCall: z.string().max(60),
+  handle: z.string(),
+  enabled: z.boolean(),
+});
+export type OverlayWireConfig = z.infer<typeof OverlayWireConfig>;
+/** O que o painel pode mudar (destination e handle vêm do perfil). */
+export const UpdateWireConfig = OverlayWireConfig.omit({ destination: true, handle: true }).partial();
+
+/** Estado partilhado pelos widgets W2–W6 (mensagem WS "state"). */
+export const OverlayState = z.object({
+  goal: z.object({ title: z.string(), current: Kz, target: Kz }).nullable(),
+  ranking: z.array(z.object({ name: z.string(), kz: Kz })),
+  latest: z.array(z.object({ name: z.string(), kz: Kz, text: z.string() })),
+  queueSize: z.number().int(),
+});
+export type OverlayState = z.infer<typeof OverlayState>;
+
+export const WidgetConn = z.enum(["aberto", "fechado", "a_religar"]);
+export const WidgetSummary = z.object({
+  id: WidgetId,
+  token: z.string(),
+  url: z.string(),
+  conn: WidgetConn,
+  /** Onde está aberto (cenário C1–C4 e app pelo user agent). */
+  where: z.string().nullable(),
+  openCount: z.number().int(),
+  warning: z.string().nullable(),
+  blocked: z.boolean(),
+  blockedReason: z.string().nullable(),
+  config: OverlayWireConfig,
+});
+export type WidgetSummary = z.infer<typeof WidgetSummary>;
+
+export const LastTest = z.object({ sentAt: IsoDate.nullable(), pageOpen: z.boolean(), played: z.boolean() });
+export type LastTest = z.infer<typeof LastTest>;
