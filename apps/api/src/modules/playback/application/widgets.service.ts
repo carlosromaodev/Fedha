@@ -12,11 +12,11 @@ import { audit } from "../../../shared/audit/audit";
 import type { OutputConnection } from "../../../shared/realtime/hub";
 import type { Streamer } from "../../streamers/application/streamers.service";
 
-export const WIDGET_KINDS: WidgetKind[] = ["overlay", "goal", "ranking", "latest", "qr", "combined", "player"];
+export const WIDGET_KINDS: WidgetKind[] = ["overlay", "goal", "latest", "ranking", "qr", "combined", "player"];
 type TokenRow = typeof schema.widgetTokens.$inferSelect;
 
 export function widgetUrl(ctx: Ctx, kind: WidgetKind, token: string) {
-  const base = (kind === "player" ? ctx.env.PUBLIC_WEB_URL : ctx.env.PUBLIC_OVERLAY_URL).replace(/\/$/, "");
+  const base = (kind === "player" ? ctx.env.PUBLIC_WEB_URL : ctx.env.PUBLIC_OVERLAY_URL ?? ctx.env.PUBLIC_WEB_URL).replace(/\/$/, "");
   const id = ID_BY_WIDGET[kind];
   return kind === "player" ? `${base}/player/${token}` : `${base}/o/${token}${id ? `?w=${id.slice(1)}` : ""}`;
 }

@@ -11,7 +11,8 @@ const Env = z.object({
   /** URL pública do site (página do doador, overlay, Player). */
   PUBLIC_WEB_URL: z.string().default("http://localhost:5173"),
   /** URL pública do overlay (apps/overlay). Por omissão igual ao site. */
-  PUBLIC_OVERLAY_URL: z.string().default("http://localhost:5174"),
+  /** Origem onde abrem os widgets (/o/<token>). Os widgets vivem no próprio site (RN-WID-01). */
+  PUBLIC_OVERLAY_URL: z.string().optional(),
   CORS_ORIGINS: z.string().default("http://localhost:5173,http://localhost:5174"),
   DATABASE_URL: z.string().optional(),
   JWT_SECRET: z.string().min(16).default("dev-secret-troca-isto-em-producao"),

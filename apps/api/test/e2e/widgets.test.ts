@@ -56,6 +56,10 @@ describe("widgets W1–W6 ligados ao backend", () => {
     const w1 = r.body[0];
     expect(w1.conn).toBe("fechado");
     expect(w1.config).toMatchObject({ highlightFrom: 1000, superFrom: 5000, destination: "tiktok", handle: "kiami", volume: 0.8 });
+    // RF-WID-08: W3 últimas mensagens, W4 top doadores; RN-WID-01: links no próprio site
+    expect(r.body[2].url).toMatch(/^http:\/\/localhost:5173\/o\/.+\?w=3$/);
+    const kinds = await Promise.all([2, 3].map(async (i) => (await api(`/v1/overlay/${r.body[i].token}`)).body.kind));
+    expect(kinds).toEqual(["latest", "ranking"]);
     // W5 (QR) fica bloqueado no TikTok
     expect(r.body[4].blocked).toBe(true);
   });

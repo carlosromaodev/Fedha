@@ -54,6 +54,8 @@ Legenda: ✅ implementado e testado · 🟡 implementado sem teste automático �
 | RN-WID-04 W5 desligado no TikTok/Instagram | ✅ | `qrBlocked` | `widgets.test.ts` |
 | RN-WID-05 áudio que não carrega → falha técnica | ✅ | `engine.onError` | `sdd-flows.test.ts` |
 | RN-WID-06 W1 aberto em dois sítios: toca o último | ✅ | `engine.enabledTargets` | `sdd-flows.test.ts` |
+| RF-WID-08 W3 últimas mensagens, W4 top doadores | ✅ | `contracts/api/widgets.ts` (WIDGET_BY_ID) | `widgets.test.ts` |
+| RN-WID-01 links dos widgets no próprio site | ✅ | `widgetUrl` (PUBLIC_OVERLAY_URL = PUBLIC_WEB_URL) | `widgets.test.ts` |
 
 ## Carteira, ledger e levantamentos (RN-CAR, RN-LEV, RN-REE)
 

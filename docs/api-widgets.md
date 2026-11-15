@@ -11,11 +11,11 @@ SEED_DEMO=true NODE_ENV=development pnpm dev     # http://localhost:3333, base d
 # streamer de demonstração: kiami@fedha.test / fedha2026
 ```
 
-No frontend: `VITE_API_URL=http://localhost:3333`. No overlay: `/o/<token>?w=1&api=http://localhost:3333`.
+No frontend: `VITE_API_URL=http://localhost:3333`. Os widgets abrem no próprio site: `http://localhost:5173/o/<token>?w=1` (PUBLIC_OVERLAY_URL, por omissão igual a PUBLIC_WEB_URL).
 
 ## WebSocket `/v1/realtime/overlay?token=<token>&w=<1..6>`
 
-O token vem de `GET /v1/widgets`. `w` escolhe o widget (1 alerta, 2 meta, 3 ranking, 4 últimas, 5 QR, 6 combinado).
+O token vem de `GET /v1/widgets`. `w` escolhe o widget (1 alerta, 2 meta, 3 últimas mensagens, 4 top doadores, 5 QR, 6 combinado; RF-WID-08).
 Token inválido ou revogado: a ligação fecha com o código 4001. Conta suspensa: 4003.
 
 Servidor → overlay (`{ type, data }`):

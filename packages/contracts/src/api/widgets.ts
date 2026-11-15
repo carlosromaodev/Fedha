@@ -2,11 +2,11 @@ import { z } from "zod";
 import { OutputMode } from "../alert-event";
 import { IsoDate, Kz, Platform } from "./common";
 
-/** W1 Alerta · W2 Meta · W3 Ranking · W4 Últimas · W5 QR · W6 Combinado · S3 Player (só áudio) */
+/** W1 Alerta · W2 Meta · W3 Últimas mensagens · W4 Top doadores · W5 QR · W6 Combinado · S3 Player (só áudio). RF-WID-08 */
 export const WidgetKind = z.enum(["overlay", "goal", "ranking", "latest", "qr", "combined", "player"]);
 export type WidgetKind = z.infer<typeof WidgetKind>;
 export const WIDGET_CODE: Record<WidgetKind, string> = {
-  overlay: "W1", goal: "W2", ranking: "W3", latest: "W4", qr: "W5", combined: "W6", player: "S3",
+  overlay: "W1", goal: "W2", latest: "W3", ranking: "W4", qr: "W5", combined: "W6", player: "S3",
 };
 
 export const WidgetTheme = z.enum(["claro", "noite", "sinal"]);
@@ -39,10 +39,10 @@ export const WidgetConfig = z.object({
     { tier: "destaque", minAmount: 1000, sound: null, minDisplayMs: 8000 },
     { tier: "super", minAmount: 5000, sound: null, minDisplayMs: 12000 },
   ]),
-  /** W3: período do ranking. */
+  /** W4: período do top de doadores. */
   rankingPeriod: z.enum(["live", "day", "month"]).default("live"),
   rankingSize: z.number().int().min(3).max(10).default(5),
-  /** W4: quantas mensagens mostrar. */
+  /** W3: quantas mensagens mostrar. */
   latestCount: z.number().int().min(1).max(10).default(5),
   /** W5: texto de chamada. */
   qrCallToAction: z.string().max(60).default("Manda a tua mensagem!"),
@@ -110,8 +110,8 @@ export type OverlayBootstrap = z.infer<typeof OverlayBootstrap>;
 /** Identificadores curtos usados pelo painel e pelo overlay (?w=1..6). */
 export const WidgetId = z.enum(["w1", "w2", "w3", "w4", "w5", "w6"]);
 export type WidgetId = z.infer<typeof WidgetId>;
-export const WIDGET_BY_ID: Record<WidgetId, WidgetKind> = { w1: "overlay", w2: "goal", w3: "ranking", w4: "latest", w5: "qr", w6: "combined" };
-export const ID_BY_WIDGET: Partial<Record<WidgetKind, WidgetId>> = { overlay: "w1", goal: "w2", ranking: "w3", latest: "w4", qr: "w5", combined: "w6" };
+export const WIDGET_BY_ID: Record<WidgetId, WidgetKind> = { w1: "overlay", w2: "goal", w3: "latest", w4: "ranking", w5: "qr", w6: "combined" };
+export const ID_BY_WIDGET: Partial<Record<WidgetKind, WidgetId>> = { overlay: "w1", goal: "w2", latest: "w3", ranking: "w4", qr: "w5", combined: "w6" };
 
 export const Destination = z.enum(["tiktok", "instagram", "youtube", "twitch", "kick", "facebook"]);
 export type Destination = z.infer<typeof Destination>;
