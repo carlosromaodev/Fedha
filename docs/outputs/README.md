@@ -25,3 +25,24 @@ Regra: o streamer escolhe o modo (`OutputMode`). A mesma mensagem nunca toca nas
 | Telemóvel, app nativa TikTok / Instagram / YouTube | Não | Player só-áudio |
 
 Estratégia completa: https://claude.ai/artifact/916qoRFhGb3XDAugvVSwaa
+
+## Protocolo do overlay (WebSocket)
+
+`WS /v1/realtime/overlay?token=<token>&w=<1..6>`
+
+Servidor → overlay:
+- `{type:"config", data: WidgetConfig}` ao ligar e sempre que o streamer guarda no painel (aplica-se sem recarregar a fonte).
+- `{type:"state", data:{goal, ranking, latest, queueSize}}` ao ligar e quando muda (W2–W6).
+- `{type:"alert", data: AlertEvent}` um de cada vez; o seguinte só depois do `ack`.
+- `{type:"revoked"}` quando o token é regenerado. `{type:"ping"}` → o overlay responde `pong`.
+
+Overlay → servidor:
+- `{type:"hello", data:{widget, scenario, userAgent}}` ao ligar (o painel mostra onde cada widget está aberto).
+- `{type:"ack", data:{id, playedAt}}` quando o alerta acaba; só então a mensagem passa a "tocada".
+- `{type:"ping"}` a cada 25 s.
+
+Se o som não carregar em 5 s, o texto fica 6 s no ecrã sem som e o overlay envia o `ack` na mesma.
+
+## Endpoints do painel (Widgets)
+
+`GET /v1/widgets` · `PUT /v1/widgets/:id` · `POST /v1/widgets/:id/token` · `POST /v1/widgets/test` · `GET|PUT /v1/streamer/destination` · `GET /v1/widgets/last-test`

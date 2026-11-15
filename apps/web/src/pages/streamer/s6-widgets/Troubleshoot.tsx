@@ -1,8 +1,9 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Topbar } from "../../../layouts";
 import { RouteButton, Tag, useToast } from "../../../shared/ui";
 import { cx } from "../../../shared/lib/format";
+import { lastTest, useWidgets } from "../../../features/overlay-setup/api";
 
 type Sc = "c1" | "c2" | "c3" | "c4" | "c5";
 const TABS: Array<[Sc, string]> = [["c1", "OBS / Streamlabs"], ["c2", "TikTok LIVE Studio"], ["c3", "CameraFi / PRISM"], ["c4", "Flutuante"], ["c5", "Só áudio"]];
@@ -45,6 +46,13 @@ export default function Troubleshoot() {
   const [sc, setSc] = useState<Sc>("c2");
   const [done, setDone] = useState<Record<string, boolean>>({ "c2-0": true, "c2-1": true });
   const data = CHECKS[sc];
+  const { sendTest } = useWidgets();
+  const [last, setLast] = useState<{ sentAt: string | null; pageOpen: boolean; played: boolean } | null>(null);
+  useEffect(() => { void lastTest().then(setLast).catch(() => setLast(null)); }, []);
+  const retest = async () => {
+    try { await sendTest(); toast.show("Teste enviado. Vê se aparece e se ouves o som."); setTimeout(() => void lastTest().then(setLast).catch(() => {}), 8000); }
+    catch (e) { toast.show(`Falhou: ${(e as Error).message}`); }
+  };
 
   return (
     <>
@@ -71,7 +79,7 @@ export default function Troubleshoot() {
               ))}
             </div>
             <div className="row" style={{ gap: 16, marginTop: 16, flexWrap: "wrap" }}>
-              <div style={{ width: 170 }}><RouteButton size="sm" onClick={() => toast.show("Teste enviado. Vê se aparece e se ouves o som.")}>Voltar a testar</RouteButton></div>
+              <div style={{ width: 170 }}><RouteButton size="sm" onClick={retest}>Voltar a testar</RouteButton></div>
               <Link to={`/painel/ajuda?cenario=${sc}`}>Abrir pedido de suporte com o cenário {sc.toUpperCase()} preenchido</Link>
             </div>
           </div>
@@ -89,9 +97,9 @@ export default function Troubleshoot() {
             <div className="card pad-l">
               <h2>Último teste</h2>
               <div className="lines" style={{ marginTop: 6, fontSize: 14 }}>
-                <div className="row between"><span className="muted">Enviado</span><span className="mono">21:02 · W1-T</span></div>
-                <div className="row between"><span className="muted">Página aberta</span><Tag tone="ok">Sim</Tag></div>
-                <div className="row between"><span className="muted">Som</span><Tag tone="erro">Não tocou</Tag></div>
+                <div className="row between"><span className="muted">Enviado</span><span className="mono">{last?.sentAt ?? "—"} · W1-T</span></div>
+                <div className="row between"><span className="muted">Página aberta</span><Tag tone={last?.pageOpen ? "ok" : "erro"}>{last?.pageOpen ? "Sim" : "Não"}</Tag></div>
+                <div className="row between"><span className="muted">Som</span><Tag tone={last?.played ? "ok" : "erro"}>{last?.played ? "Tocou" : "Não tocou"}</Tag></div>
               </div>
             </div>
           </div>

@@ -1,11 +1,11 @@
-import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Topbar } from "../../../layouts";
 import { RouteButton, Tag, copy, useToast } from "../../../shared/ui";
 import { PLATFORM_LABEL, streamer, type Platform } from "../../../shared/mocks/data";
+import { useWidgets } from "../../../features/overlay-setup/api";
 import { cx } from "../../../shared/lib/format";
 import { WidgetPreview } from "../../../features/overlay-setup/Previews";
-import { NO_QR, WIDGETS, widgetUrl, type Conn } from "../../../features/overlay-setup/widgets";
+import { NO_QR, widgetUrl, type Conn } from "../../../features/overlay-setup/widgets";
 
 const CONN: Record<Conn, { label: string; tone?: "ok" | "pend" | "erro" }> = {
   aberto: { label: "Aberto", tone: "ok" },
@@ -18,14 +18,19 @@ const CONN: Record<Conn, { label: string; tone?: "ok" | "pend" | "erro" }> = {
 export default function Widgets() {
   const nav = useNavigate();
   const toast = useToast();
-  const [dest, setDest] = useState<Platform>(streamer.platform);
+  const { list, destination: dest, setDestination: setDest, sendTest, error } = useWidgets();
   const qrOff = NO_QR.includes(dest);
+  const dup = list.find((w) => w.openCount > 1);
+  const test = async () => {
+    try { await sendTest(); toast.show("Alerta de teste enviado. Não é cobrado e não entra no histórico."); }
+    catch (e) { toast.show(`Não foi possível enviar o teste: ${(e as Error).message}`); }
+  };
 
   return (
     <>
       <Topbar title="Widgets" sub="Cada widget é um link que colas no programa de transmissão">
         <Link to="/painel/widgets/ajuda" className="btn hide-m">Resolver problemas</Link>
-        <div style={{ width: 230 }}><RouteButton size="sm" onClick={() => toast.show("Alerta de teste enviado para o W1")}>Enviar alerta de teste</RouteButton></div>
+        <div style={{ width: 230 }}><RouteButton size="sm" onClick={test}>Enviar alerta de teste</RouteButton></div>
       </Topbar>
       <div className="page">
         <div className="row between" style={{ gap: 16, flexWrap: "wrap" }}>
@@ -38,13 +43,16 @@ export default function Widgets() {
           <p className="muted" style={{ fontSize: 13, textAlign: "right", maxWidth: 340 }}>A posição e o tamanho definem-se no programa: arrasta a camada no OBS, LIVE Studio ou CameraFi.</p>
         </div>
 
-        <div className="aviso row between" style={{ alignItems: "center" }}>
-          <span>O W1 está aberto em 2 sítios; só o último toca.{qrOff && ` · Escolheste ${PLATFORM_LABEL[dest]}: o W5 foi desligado.`}</span>
-          <Link to="/painel/widgets/ajuda" style={{ whiteSpace: "nowrap" }}>Ver onde</Link>
-        </div>
+        {error && <div className="aviso erro">Não foi possível ler o estado dos widgets: {error}</div>}
+        {(dup || qrOff) && (
+          <div className="aviso row between" style={{ alignItems: "center" }}>
+            <span>{dup && `O W${dup.n} está aberto em ${dup.openCount} sítios; só o último toca.`}{dup && qrOff && " · "}{qrOff && `Escolheste ${PLATFORM_LABEL[dest]}: o W5 foi desligado.`}</span>
+            {dup && <Link to="/painel/widgets/ajuda" style={{ whiteSpace: "nowrap" }}>Ver onde</Link>}
+          </div>
+        )}
 
         <div className="wg-grid">
-          {WIDGETS.map((w) => {
+          {list.map((w) => {
             const off = w.id === "w5" && qrOff;
             const st = off ? { label: `Desligado · ${PLATFORM_LABEL[dest]}` } : CONN[w.conn];
             return (
@@ -53,7 +61,7 @@ export default function Widgets() {
                   <span className="id">W{w.n}</span><b>{w.name}</b>
                   <Tag tone={st.tone}>{st.label}{!off && w.where ? ` · ${w.where}` : ""}</Tag>
                 </div>
-                <WidgetPreview id={w.id} disabled={off} />
+                <WidgetPreview id={w.id} theme={w.config.theme} disabled={off} />
                 <div className="row between">
                   <button className="btn dark sm" disabled={off} onClick={() => { copy(widgetUrl(w, { dest })); toast.show(`Link do W${w.n} copiado. Não o mostres na live.`); }}>Copiar link</button>
                   <div className="row" style={{ gap: 6 }}>

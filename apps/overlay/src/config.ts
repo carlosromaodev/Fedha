@@ -69,7 +69,8 @@ export function readConfig(loc: Location = window.location): OverlayConfig {
     handle: q.get("h") ?? "kiami",
     demo: q.get("demo") === "1" || token === "demo",
     preview: q.get("preview") === "1",
-    api: q.get("api"),
+    // Em produção a API vem do build (VITE_API_URL); ?api= serve para testar contra outro servidor.
+    api: q.get("api") ?? ((import.meta.env.VITE_API_URL as string | undefined) || null),
   };
 }
 

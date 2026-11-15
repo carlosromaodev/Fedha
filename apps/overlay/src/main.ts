@@ -39,6 +39,12 @@ const link = connect(cfg, {
     void pump();
   },
   onState(s) { state = { ...state, ...s }; render(); },
+  onConfig(c) {
+    // O painel guardou alterações: aplicam-se já, sem recarregar a fonte no OBS.
+    Object.assign(cfg, Object.fromEntries(Object.entries(c).filter(([, v]) => v !== undefined && v !== null)));
+    stage.className = `stage sc-${cfg.scenario}${cfg.preview ? " preview" : ""}`;
+    render();
+  },
   onConnection(c) {
     // O estado da ligação nunca aparece na live; só na pré-visualização do painel.
     status.textContent = cfg.preview ? ({ ligado: "", a_ligar: "A ligar…", desligado: "Sem ligação · a tentar de novo", revogado: "Link revogado · gera um novo no painel" })[c] : "";

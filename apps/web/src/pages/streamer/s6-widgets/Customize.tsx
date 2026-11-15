@@ -1,11 +1,12 @@
-import { useState, type ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { Topbar } from "../../../layouts";
 import { Field, RouteButton, Volume, copy, useToast } from "../../../shared/ui";
 import { goal, pastGoals } from "../../../shared/mocks/data";
 import { cx, kz } from "../../../shared/lib/format";
 import { AlertCard } from "../../../features/overlay-setup/Previews";
-import { WIDGETS, publicWidgetLink, widgetUrl, type WidgetTheme } from "../../../features/overlay-setup/widgets";
+import { publicWidgetLink, widgetUrl, type WidgetTheme } from "../../../features/overlay-setup/widgets";
+import { useWidgets } from "../../../features/overlay-setup/api";
 
 const ACCENTS = ["#C9F25C", "#F5A243", "#7CC8F2", "#F28AB2"];
 const SOUNDS = ["Moeda Fedha", "Batida de kuduro", "Aplausos", "Sem som"];
@@ -33,7 +34,9 @@ export default function Customize() {
 function AlertSettings() {
   const nav = useNavigate();
   const toast = useToast();
-  const w = WIDGETS[0]!;
+  const { list, save, regenerate, sendTest, destination } = useWidgets();
+  const w = list[0]!;
+  const [busy, setBusy] = useState(false);
   const [theme, setTheme] = useState<WidgetTheme>("claro");
   const [accent, setAccent] = useState(ACCENTS[0]!);
   const [size, setSize] = useState<"p" | "m" | "g">("m");
@@ -49,6 +52,24 @@ function AlertSettings() {
   const [reduce, setReduce] = useState(false);
   const [level, setLevel] = useState<"normal" | "destaque" | "super">("destaque");
 
+  // Quando a configuração chega da API, preenche o formulário.
+  useEffect(() => {
+    const c = w.config;
+    setTheme(c.theme); setAccent(c.accent); setSize(c.size); setShow({ name: c.showName, value: c.showValue, karaoke: c.karaoke });
+    setVol(Math.round(c.volume * 100)); setHl(c.highlightFrom); setSup(c.superFrom); setEnter(c.enterMs); setExit(c.exitMs); setReduce(c.reduceMotion);
+    if (c.entrySound) setSound(c.entrySound); if (c.superSound) setSuperSound(c.superSound); if (c.voiceId) setVoice(c.voiceId);
+  }, [w.config]);
+
+  const onSave = async () => {
+    setBusy(true);
+    try {
+      await save("w1", { ...w.config, theme, accent, size, showName: show.name, showValue: show.value, karaoke: show.karaoke, reduceMotion: reduce,
+        highlightFrom: hl, superFrom: sup, enterMs: enter, exitMs: exit, volume: vol / 100, entrySound: sound, superSound, voiceId: voice });
+      toast.show("Guardado. O W1 atualiza na live em segundos.");
+    } catch (e) { toast.show(`Não foi possível guardar: ${(e as Error).message}`); }
+    finally { setBusy(false); }
+  };
+
   const err = {
     sup: sup <= hl ? "Tem de ser maior que o destaque." : null,
     hl: hl < 100 ? "O mínimo é 100 Kz." : null,
@@ -62,7 +83,7 @@ function AlertSettings() {
     <>
       <Topbar title="W1 · Alerta de mensagem" sub="Personalizar · as alterações aparecem na pré-visualização e na live ao guardar">
         <button className="btn" onClick={() => nav("/painel/widgets")}>Voltar</button>
-        <div style={{ width: 140 }}><RouteButton size="sm" disabled={!ok} onClick={() => toast.show("Guardado. O W1 atualiza na live em segundos.")}>Guardar</RouteButton></div>
+        <div style={{ width: 140 }}><RouteButton size="sm" disabled={!ok || busy} onClick={onSave}>{busy ? "A guardar…" : "Guardar"}</RouteButton></div>
       </Topbar>
       <div className="page">
         <div className="split" style={{ gridTemplateColumns: "minmax(0,1fr) minmax(0,1fr)" }}>
@@ -118,15 +139,15 @@ function AlertSettings() {
               </div>
               <div className="seg">{(["normal", "destaque", "super"] as const).map((l) => <button key={l} className={level === l ? "on" : ""} onClick={() => setLevel(l)}>{l[0]!.toUpperCase() + l.slice(1)}</button>)}</div>
               <div className="row" style={{ gap: 10 }}>
-                <a className="btn" style={{ height: 52 }} href={`${widgetUrl(w, { dest: "tiktok", theme, preview: true })}&reduce=${reduce ? 1 : 0}&in=${enter}&out=${exit}&hl=${hl}&sup=${sup}&accent=${accent.slice(1)}&size=${size}`} target="_blank" rel="noreferrer">Ouvir</a>
-                <RouteButton onClick={() => toast.show("Teste enviado para a live")}>Enviar teste para a live</RouteButton>
+                <a className="btn" style={{ height: 52 }} href={`${widgetUrl(w, { dest: destination, theme, preview: true })}&reduce=${reduce ? 1 : 0}&in=${enter}&out=${exit}&hl=${hl}&sup=${sup}&accent=${accent.slice(1)}&size=${size}`} target="_blank" rel="noreferrer">Ouvir</a>
+                <RouteButton onClick={() => sendTest().then(() => toast.show("Teste enviado para a live"), (e) => toast.show(`Falhou: ${(e as Error).message}`))}>Enviar teste para a live</RouteButton>
               </div>
             </div>
             <div className="card">
               <span className="eyebrow">Link do widget</span>
               <div className="row between" style={{ marginTop: 8, gap: 12 }}>
                 <span className="mono">{publicWidgetLink(w)}</span>
-                <span className="row" style={{ gap: 12 }}><button className="link" onClick={() => { copy(widgetUrl(w, { dest: "tiktok" })); toast.show("Link copiado"); }}>Copiar</button><button className="link" onClick={() => toast.show("Link antigo revogado. Cola o novo no programa.")}>Gerar novo</button></span>
+                <span className="row" style={{ gap: 12 }}><button className="link" onClick={() => { copy(widgetUrl(w, { dest: destination })); toast.show("Link copiado"); }}>Copiar</button><button className="link" onClick={() => regenerate("w1").then(() => toast.show("Link antigo revogado. Cola o novo no programa."), (e) => toast.show(`Falhou: ${(e as Error).message}`))}>Gerar novo</button></span>
               </div>
               <p className="hint">Posição e tamanho: ajusta a camada no programa de transmissão. Recomendado: 1080×1920 no TikTok LIVE Studio, 1920×1080 no OBS.</p>
             </div>

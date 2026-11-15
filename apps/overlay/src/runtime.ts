@@ -12,8 +12,14 @@ export interface OverlayState {
 /** Evento de alerta com os campos opcionais que a API acrescenta ao AlertEvent. */
 export type Alert = AlertEvent & { tier?: string; isTest?: boolean; voice?: string; priority?: boolean; effectUrl?: string };
 
+/** Configuração do widget guardada no painel (PUT /v1/widgets/:id). Sobrepõe-se aos parâmetros do URL. */
+export type WidgetConfig = Partial<Pick<OverlayConfig,
+  "theme" | "accent" | "size" | "showName" | "showValue" | "karaoke" | "reduceMotion" | "highlightFrom" | "superFrom" |
+  "enterMs" | "exitMs" | "gapMs" | "volume" | "destination" | "qrCall" | "handle" | "scenario">>;
+
 type Listener = {
   onAlert: (a: Alert) => void;
+  onConfig: (c: WidgetConfig) => void;
   onState: (s: Partial<OverlayState>) => void;
   onConnection: (c: "ligado" | "a_ligar" | "desligado" | "revogado") => void;
 };
@@ -32,11 +38,17 @@ export function connect(cfg: OverlayConfig, l: Listener) {
   const open = () => {
     l.onConnection("a_ligar");
     ws = new WebSocket(url);
-    ws.onopen = () => { retry = 0; l.onConnection("ligado"); };
+    ws.onopen = () => {
+      retry = 0;
+      l.onConnection("ligado");
+      ws?.send(JSON.stringify({ type: "hello", data: { widget: cfg.widget, scenario: cfg.scenario, userAgent: navigator.userAgent } }));
+    };
     ws.onmessage = (m) => {
       try {
         const msg = JSON.parse(String(m.data)) as { type: string; data: unknown };
         if (msg.type === "alert") l.onAlert(msg.data as Alert);
+        else if (msg.type === "config") l.onConfig(msg.data as WidgetConfig);
+        else if (msg.type === "ping") ws?.send(JSON.stringify({ type: "pong" }));
         else if (msg.type === "state") l.onState(msg.data as Partial<OverlayState>);
         else if (msg.type === "revoked") { closed = true; l.onConnection("revogado"); ws?.close(); }
       } catch { /* mensagem inválida: ignorar */ }
@@ -49,9 +61,10 @@ export function connect(cfg: OverlayConfig, l: Listener) {
     };
   };
   open();
+  const hb = setInterval(() => { if (ws?.readyState === 1) ws.send(JSON.stringify({ type: "ping" })); }, 25000);
   return {
     ack: (id: string) => ws?.readyState === 1 && ws.send(JSON.stringify({ type: "ack", data: { id, playedAt: new Date().toISOString() } })),
-    close: () => { closed = true; ws?.close(); },
+    close: () => { closed = true; clearInterval(hb); ws?.close(); },
   };
 }
 
