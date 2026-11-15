@@ -1,0 +1,7 @@
+# W3 — Ranking
+
+Área: Widgets OBS (fundo transparente, sem navegação)
+
+Conteúdo, estados e ações: ver a especificação funcional e o prompt das telas, tela W3.
+
+Ficheiros previstos: `index.tsx`, `components/`, `hooks/`.

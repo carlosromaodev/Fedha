@@ -1,0 +1,3 @@
+# realtime
+
+Cliente WebSocket/SSE.

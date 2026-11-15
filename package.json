@@ -1,0 +1,8 @@
+{
+  "name": "fedha-live",
+  "private": true,
+  "scripts": {
+    "dev:api": "pnpm --filter @fedha/api dev",
+    "dev:web": "pnpm --filter @fedha/web dev"
+  }
+}
