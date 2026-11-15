@@ -41,6 +41,9 @@ importers:
       '@fedha/contracts':
         specifier: workspace:*
         version: link:../../packages/contracts
+      qrcode-generator:
+        specifier: ^1.4.4
+        version: 1.5.2
       zod:
         specifier: ^3.23.0
         version: 3.25.76
@@ -955,6 +958,9 @@ packages:
 
   process-warning@5.1.1:
     resolution: {integrity: sha512-oCkNVj4OKnKEcocVBcDfiIugN1/cE6rgfT3nCtzeqZPA8+rIxMaQ0xXzIkGP8Gj2qUaP1UR7uhJ1VD8lUCpzCg==}
+
+  qrcode-generator@1.5.2:
+    resolution: {integrity: sha512-pItrW0Z9HnDBnFmgiNrY1uxRdri32Uh9EjNYLPVC2zZ3ZRIIEqBoDgm4DkvDwNNDHTK7FNkmr8zAa77BYc9xNw==}
 
   quick-format-unescaped@4.0.4:
     resolution: {integrity: sha512-tYC1Q1hgyRuHgloV/YXs2w15unPVh8qfu/qCTfhTYamaw7fyhumKa2yGpdSo87vY32rIclj+4fWYQXUMs9EHvg==}
@@ -1928,6 +1934,8 @@ snapshots:
       source-map-js: 1.2.2
 
   process-warning@5.1.1: {}
+
+  qrcode-generator@1.5.2: {}
 
   quick-format-unescaped@4.0.4: {}
 
