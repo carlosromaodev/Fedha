@@ -15,7 +15,7 @@ const BRAND = `<span class="brand"><b>Fedha</b> LIVE</span>`;
  * → pausa final (1 s, super +2 s) → saída (300–500 ms, nunca antes do som acabar).
  * Se o som não carregar em 5 s, o texto fica 6 s sem som e o widget segue.
  */
-export async function playAlert(host: HTMLElement, a: Alert, cfg: OverlayConfig, queueSize: number) {
+export async function playAlert(host: HTMLElement, a: Alert, cfg: OverlayConfig, queueSize: number): Promise<{ played: boolean }> {
   const level = levelOf(a.amountKz, cfg);
   const minimal = cfg.scenario === "c4";
   const el = document.createElement("div");
@@ -105,6 +105,7 @@ export async function playAlert(host: HTMLElement, a: Alert, cfg: OverlayConfig,
   el.classList.add("out");
   await wait(cfg.reduceMotion ? 300 : cfg.exitMs);
   el.remove();
+  return { played: loaded };
 }
 
 /* ------------------------------------------------------------------ W2 · meta */
