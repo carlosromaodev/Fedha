@@ -28,7 +28,7 @@
 @media (min-width: 900px) {
   .sp-wrap { max-width: 1120px; }
   .sp-head { border-radius: 0 0 var(--r-l) var(--r-l); padding: 18px 32px; }
-  .sp-grid { display: grid; grid-template-columns: 1fr 1.1fr; gap: 40px; padding: 40px 32px; align-items: start; }
+  .sp-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr); gap: 40px; padding: 40px 32px; align-items: start; }
   .sp-profile { position: sticky; top: 24px; }
   .sp-foot { position: sticky; margin-left: auto; width: calc((100% - 64px - 40px) / 2.1 * 1.1); margin-right: 32px; border: 0; border-radius: var(--r-l) var(--r-l) 0 0; }
 }
@@ -73,7 +73,7 @@
 .land-sec { max-width: 1120px; margin: 0 auto; padding: 48px 20px; }
 .land-steps { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
 .land-steps .card .n { font: 500 12px var(--mono); color: var(--verde); }
-@media (max-width: 760px) { .land-steps { grid-template-columns: 1fr; } }
+@media (max-width: 760px) { .land-steps { grid-template-columns: minmax(0, 1fr); } }
 
 /* Overlay (pré-visualização dentro do painel) */
 .ov-stage { position: relative; border-radius: var(--r-m); background: repeating-linear-gradient(135deg, #1b2a24 0 12px, #18251f 12px 24px); overflow: hidden; }
@@ -148,7 +148,7 @@
 /* ---------- S6 Widgets ---------- */
 .wg-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
 @media (max-width: 1200px) { .wg-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
-@media (max-width: 760px) { .wg-grid { grid-template-columns: 1fr; } }
+@media (max-width: 760px) { .wg-grid { grid-template-columns: minmax(0, 1fr); } }
 .wg { display: flex; flex-direction: column; gap: 12px; padding: 14px; }
 .wg .hd { display: flex; align-items: center; gap: 8px; }
 .wg .hd .id { font: 500 11px var(--mono); color: var(--tinta-3); }
@@ -216,7 +216,7 @@
 .land-hero h1 { margin-top: 18px; }
 .land-card { display: flex; flex-direction: column; justify-content: space-between; gap: 40px; min-height: 420px; margin-top: 40px; padding: 30px; border-radius: var(--r-l); background: var(--verde-fundo); }
 .land-sym { width: 54px; height: 54px; background: var(--branco); -webkit-mask: url(/symbol.png) center/contain no-repeat; mask: url(/symbol.png) center/contain no-repeat; }
-@media (max-width: 900px) { .land-grid { grid-template-columns: 1fr; } }
+@media (max-width: 900px) { .land-grid { grid-template-columns: minmax(0, 1fr); } }
 /* Confirmação no desktop: coluna central */
 @media (min-width: 900px) {
   .pub.verde.cf { max-width: none; }
