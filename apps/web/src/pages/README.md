@@ -45,8 +45,5 @@ Uma pasta por tela, com o mesmo código da especificação.
 | B9 | Configurações | `pages/admin/b9-settings` |
 | B10 | Suporte | `pages/admin/b10-support` |
 | B11 | Administradores e auditoria | `pages/admin/b11-admins-audit` |
-| W1 | Alerta | `pages/widgets/w1-alert` |
-| W2 | Meta | `pages/widgets/w2-goal` |
-| W3 | Ranking | `pages/widgets/w3-ranking` |
-| W4 | Últimas mensagens | `pages/widgets/w4-latest` |
-| W5 | QR code | `pages/widgets/w5-qr-code` |
+
+Os widgets W1–W5 vivem em `apps/overlay`, não no painel.
