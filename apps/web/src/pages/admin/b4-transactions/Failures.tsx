@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Topbar } from "../../../layouts";
-import { Empty, Modal, RouteButton, Tag, useToast } from "../../../shared/ui";
+import { Empty, Field, Modal, RouteButton, Tag, useToast } from "../../../shared/ui";
 import { kz, maskPhone } from "../../../shared/lib/format";
 
 const FAILS = [
@@ -13,10 +13,11 @@ const FAILS = [
 export default function Failures() {
   const [list, setList] = useState(FAILS);
   const [sel, setSel] = useState<(typeof FAILS)[number] | null>(null);
+  const [note, setNote] = useState("");
   const toast = useToast();
   return (
     <>
-      <Topbar title="Falhas técnicas" />
+      <Topbar title="Falhas técnicas e reembolsos" sub="Só há reembolso por falha técnica" />
       <div className="page">
         <p className="muted">Mensagens pagas que não puderam ser emitidas, ou que não tocaram em 7 dias. O reembolso devolve o valor ao número que pagou e retira-o do saldo pendente do streamer.</p>
         <div className="card table-wrap" style={{ padding: 0 }}>
@@ -38,17 +39,19 @@ export default function Failures() {
         </div>
       </div>
       {sel && (
-        <Modal title="Reembolsar por falha técnica" onClose={() => setSel(null)}>
+        <Modal title="Reembolsar esta mensagem?" onClose={() => setSel(null)}>
+          <div className="eyebrow" style={{ marginTop: -8, marginBottom: 12 }}>{sel.id} · falha técnica</div>
+          <div className="card" style={{ background: "var(--papel)", padding: 14, fontSize: 13, marginBottom: 12 }}>Registo técnico: {sel.reason}. A mensagem não foi emitida.</div>
           <div className="lines" style={{ fontSize: 14 }}>
             <div className="row between"><span className="muted">Pedido</span><span className="mono">{sel.id}</span></div>
             <div className="row between"><span className="muted">Motivo</span><span>{sel.reason}</span></div>
             <div className="row between"><span className="muted">Devolver a</span><span className="mono">{maskPhone(sel.donor)} · Multicaixa Express</span></div>
             <div className="row between"><span className="muted">Retirado do pendente de</span><span>{sel.streamer}</span></div>
           </div>
-          <div className="aviso" style={{ marginTop: 14 }}>Fica registado na auditoria com o teu nome. O doador recebe SMS com o recibo.</div>
+          <div style={{ marginTop: 14 }}><Field label="Nota interna (obrigatória)" error={note && note.trim().length < 10 ? "Escreve pelo menos 10 caracteres." : null} hint="Fica na auditoria com o teu nome. O doador recebe SMS com o recibo."><input value={note} onChange={(e) => setNote(e.target.value)} placeholder="Escreve o motivo" /></Field></div>
           <div className="row" style={{ gap: 10, marginTop: 16 }}>
             <button className="btn" style={{ height: 52, flex: "0 0 38%" }} onClick={() => setSel(null)}>Cancelar</button>
-            <RouteButton value={sel.kz} onClick={() => { setList(list.filter((x) => x !== sel)); setSel(null); toast.show("Reembolso enviado"); }}>Reembolsar</RouteButton>
+            <RouteButton value={sel.kz} disabled={note.trim().length < 10} onClick={() => { setList(list.filter((x) => x !== sel)); setSel(null); setNote(""); toast.show("Reembolso enviado"); }}>Reembolsar</RouteButton>
           </div>
         </Modal>
       )}

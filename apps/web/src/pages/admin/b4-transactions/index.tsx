@@ -28,12 +28,11 @@ export default function Transactions() {
 
   return (
     <>
-      <Topbar title="Transações">
-        <span className="mono muted hide-m" style={{ fontSize: 12 }}>Atualizado 21:06 · hora de Luanda</span>
+      <Topbar title="Transações" sub="Hoje · 612 transações">
         <button className="btn" onClick={() => toast.show("Exportação CSV pedida")}>Exportar CSV</button>
       </Topbar>
-      <div className="page" style={{ gap: 0, padding: 0 }}>
-        <div className="row" style={{ gap: 8, flexWrap: "wrap", padding: "16px 24px", background: "var(--branco)", borderBottom: "1px solid var(--linha)" }}>
+      <div className="page">
+        <div className="row" style={{ gap: 8, flexWrap: "wrap" }}>
           <input className="chip" style={{ minWidth: 250, outline: 0 }} placeholder="Procurar ID, telemóvel ou streamer" value={q} onChange={(e) => setQ(e.target.value)} aria-label="Procurar" />
           <select className="chip" value={status} onChange={(e) => setStatus(e.target.value as TxStatus | "todos")} aria-label="Estado">
             <option value="todos">Estado: todos</option>
@@ -47,14 +46,12 @@ export default function Transactions() {
           </select>
           <button className="link" style={{ marginLeft: "auto" }} onClick={() => { setQ(""); setStatus("todos"); setMethod("todos"); }}>Limpar filtros</button>
         </div>
-        <div className="grid g4" style={{ gap: 0, background: "var(--branco)", borderBottom: "1px solid var(--linha)" }}>
-          {[["Volume hoje", kz(1284500)], ["Receita (10%)", kz(128450)], ["Mensagens emitidas", "598"], ["Falhas técnicas", `3 · ${kz(14500)}`]].map(([l, v], i) => (
-            <div key={l} className="stat" style={{ padding: "16px 24px", borderLeft: i ? "1px solid var(--linha)" : undefined }}>
-              <div className="eyebrow">{l}</div><div className="big" style={{ fontSize: 21, marginTop: 6 }}>{v}</div>
-            </div>
+        <div className="grid g4">
+          {[["Volume hoje", kz(1284500)], ["Receita (10%)", kz(128450)], ["Mensagens emitidas", "598"], ["Falhas técnicas", `3 · ${kz(14500)}`]].map(([l, v]) => (
+            <div key={l} className="card stat"><div className="eyebrow">{l}</div><div className="big" style={{ marginTop: 6 }}>{v}</div></div>
           ))}
         </div>
-        <div className="table-wrap" style={{ background: "var(--branco)", flex: 1 }}>
+        <div className="card table-wrap" style={{ padding: "4px 8px" }}>
           {view === "carregar" ? (
             <div className="stack" style={{ gap: 14, padding: 24 }}>{Array.from({ length: 6 }, (_, i) => <div key={i} className="skel" style={{ height: 18 }} />)}</div>
           ) : view === "erro" ? (
@@ -81,7 +78,7 @@ export default function Transactions() {
             </table>
           )}
         </div>
-        <div className="row between" style={{ padding: "14px 24px", fontSize: 13 }}>
+        <div className="row between" style={{ padding: "4px 8px", fontSize: 13 }}>
           <span className="mono muted">1–{rows.length} de 612</span>
           <div className="row" style={{ gap: 6 }}>{["‹", "1", "2", "3", "…", "77", "›"].map((p, i) => <button key={i} className={cx("chip", p === "1" && "on")} style={{ height: 32, minWidth: 32, justifyContent: "center", padding: 0 }}>{p}</button>)}</div>
         </div>
