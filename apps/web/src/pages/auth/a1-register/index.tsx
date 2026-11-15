@@ -37,8 +37,15 @@ export default function Register() {
   const valid = !err.name && !err.tel && !err.email && !err.pass && terms;
 
   return (
-    <StepsLayout step={0} title="Cria a tua conta de streamer" text="Cinco passos curtos. Ao fim, tens um link para partilhar na live.">
-      <h1>Os teus dados</h1>
+    <StepsLayout step={0} title="Cria a tua conta de streamer" text="Cinco passos curtos. Ao fim, tens um link para partilhar na live."
+      headLink={<Link to="/auth/entrar" className="auth-head-link">Entrar</Link>}
+      foot={<>
+        <RouteButton disabled={!valid} onClick={() => nav("/auth/verificar", { state: { tel: digits, name: name.trim() } })}>Continuar</RouteButton>
+        <p className="muted d-only" style={{ textAlign: "center", fontSize: 14 }}>Já tens conta? <Link to="/auth/entrar">Entrar</Link></p>
+      </>}>
+      <h1 className="d-only">Os teus dados</h1>
+      <h1 className="m-only">Cria a tua conta</h1>
+      <p className="muted m-only" style={{ marginTop: -6 }}>Recebe mensagens pagas em Kz nas tuas lives do TikTok e do YouTube.</p>
       <Field label="Nome completo" error={t.name ? err.name : null} ok={!!name && !err.name}
         aside={!!name && !err.name ? <span style={{ width: 18, height: 18, borderRadius: "50%", background: "var(--verde)", display: "inline-block" }} aria-label="Válido" /> : undefined}>
         <input value={name} autoComplete="name" onChange={(e) => setName(e.target.value)} onBlur={() => touch("name")} />
@@ -60,13 +67,12 @@ export default function Register() {
             <i key={i} style={{ height: "100%", background: i < Math.ceil((s / 4) * 12) ? (s <= 1 ? "var(--erro)" : s === 2 ? "#d39b2a" : "var(--verde)") : undefined }} />
           ))}
         </div>
+        <div className="row between eyebrow" style={{ marginTop: 6 }}><span>Força · {pass ? LABEL[s] : "—"}</span><span>8+ caracteres · 1 número</span></div>
       </div>
       <label className="row" style={{ gap: 12, fontSize: 14 }}>
         <input type="checkbox" className="selo" checked={terms} onChange={(e) => setTerms(e.target.checked)} />
         <span>Li e aceito os <a href="#termos">Termos</a> e a <a href="#privacidade">Política de privacidade</a>.</span>
       </label>
-      <RouteButton disabled={!valid} onClick={() => nav("/auth/verificar", { state: { tel: digits, name: name.trim() } })}>Continuar</RouteButton>
-      <p className="muted" style={{ textAlign: "center", fontSize: 14 }}>Já tens conta? <Link to="/auth/entrar">Entrar</Link></p>
     </StepsLayout>
   );
 }

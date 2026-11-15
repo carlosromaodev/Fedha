@@ -56,10 +56,14 @@ export default function Troubleshoot() {
 
   return (
     <>
-      <Topbar title="Resolução de problemas" sub="O alerta não aparece ou não toca">
+      <Topbar mtitle="Problemas" mActions={false} title="Resolução de problemas" sub="O alerta não aparece ou não toca">
         <button className="btn" onClick={() => nav("/painel/widgets")}>Voltar</button>
       </Topbar>
       <div className="page">
+        <div className="m-only">
+          <span className="eyebrow">{sc.toUpperCase()} · {TABS.find(([k]) => k === sc)![1]}</span>
+          <h1 className="page-h" style={{ marginTop: 4 }}>O alerta não aparece</h1>
+        </div>
         <div className="chips" role="tablist">
           {TABS.map(([k, l]) => (
             <button key={k} role="tab" aria-selected={sc === k} className={cx("chip", sc === k && "on")} onClick={() => setSc(k)}>
@@ -69,7 +73,7 @@ export default function Troubleshoot() {
         </div>
         <div className="split">
           <div className="card pad-l">
-            <div className="row between"><h2>{data.title}</h2><Tag tone="erro">Não aparece</Tag></div>
+            <div className="row between d-only"><h2>{data.title}</h2><Tag tone="erro">Não aparece</Tag></div>
             <div className="check-list" style={{ marginTop: 8 }}>
               {data.items.map(([q, a], i) => (
                 <div key={q}>
@@ -78,12 +82,12 @@ export default function Troubleshoot() {
                 </div>
               ))}
             </div>
-            <div className="row" style={{ gap: 16, marginTop: 16, flexWrap: "wrap" }}>
+            <div className="row ts-actions" style={{ gap: 16, marginTop: 16, flexWrap: "wrap" }}>
               <div style={{ width: 170 }}><RouteButton size="sm" onClick={retest}>Voltar a testar</RouteButton></div>
               <Link to={`/painel/ajuda?cenario=${sc}`}>Abrir pedido de suporte com o cenário {sc.toUpperCase()} preenchido</Link>
             </div>
           </div>
-          <div className="stack" style={{ gap: 16 }}>
+          <div className="stack d-only" style={{ gap: 16 }}>
             <div className="card pad-l">
               <h2>Outros cenários</h2>
               <div className="lines" style={{ marginTop: 6 }}>

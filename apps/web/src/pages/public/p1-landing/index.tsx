@@ -13,6 +13,21 @@ const SCENARIOS = [
 export default function Landing() {
   return (
     <div>
+      {/* Telemóvel (design mobile 01): abertura com o símbolo e as duas ações. */}
+      <section className="m-only land-intro">
+        <div className="grow stack" style={{ justifyContent: "center", gap: 18 }}>
+          <span className="land-sym big" aria-hidden />
+          <p className="land-word"><b>Fedha</b> LIVE</p>
+          <p style={{ fontSize: 21, fontWeight: 300, color: "rgba(255,255,255,.9)" }}>Dinheiro que se ouve.</p>
+          <Wave n={14} />
+        </div>
+        <div className="stack" style={{ gap: 12 }}>
+          <Link className="btn-route sinal" to="/auth/registo"><span className="label">Criar conta de streamer</span><span className="dot" /></Link>
+          <Link className="btn ghost-light block" style={{ height: 52 }} to="/auth/entrar">Entrar</Link>
+          <p style={{ textAlign: "center", fontSize: 13, color: "rgba(255,255,255,.8)", lineHeight: 1.5 }}>És espectador? Abre o link que o streamer partilhou na live.</p>
+        </div>
+      </section>
+      <div className="d-only">
       <section className="land-hero">
         <div className="inner">
           <div className="row between">
@@ -80,6 +95,7 @@ export default function Landing() {
         <span className="muted">© 2026 Fedha LIVE · Luanda</span>
         <Link to="/pedido" className="link">Consultar um pedido</Link>
       </footer>
+      </div>
     </div>
   );
 }

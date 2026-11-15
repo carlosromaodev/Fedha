@@ -20,33 +20,37 @@ export default function Onboarding() {
   const any = list.some((p) => p.on);
 
   if (done) {
+    // Design 05 (tudo pronto): ecrã verde com o que está feito e o que falta.
     return (
-      <StepsLayout step={4} title="Está quase" text="Partilha fedha.live/kiami na tua próxima live. As mensagens aparecem no ecrã e tocam assim que forem pagas.">
-        <h1>Primeiros passos</h1>
-        <div className="card lines" style={{ padding: "4px 20px" }}>
-          {[
-            ["Perfil e link", true, null],
-            ["Plataformas", true, null],
-            ["Preços", true, "Valores sugeridos · podes mudar"],
-            ["Widget de alerta na live", false, "Copia o link do W1 para o OBS, LIVE Studio ou CameraFi"],
-            ["Verificação de identidade", false, "Só é preciso para levantar"],
-          ].map(([t, ok, sub]) => (
-            <div key={t as string} className="row" style={{ gap: 12 }}>
-              <span style={{ width: 22, height: 22, borderRadius: "50%", flex: "none", ...(ok ? { background: "var(--verde)" } : { border: "1.5px dashed var(--tinta-3)" }) }} />
-              <span className="grow"><b style={{ fontWeight: 500 }}>{t as string}</b>{sub && <><br /><small className="muted">{sub as string}</small></>}</span>
-            </div>
-          ))}
-        </div>
-        <RouteButton onClick={() => nav("/verificacao")}>Verificar identidade agora</RouteButton>
-        <button className="btn block" onClick={() => nav("/painel/widgets")}>Ligar o widget primeiro</button>
-        <button className="link" style={{ alignSelf: "center", fontSize: 14 }} onClick={() => nav("/painel")}>Ir para o painel</button>
-      </StepsLayout>
+      <div className="done-screen">
+        <main>
+          <span className="land-sym" style={{ width: 52, height: 52 }} aria-hidden />
+          <h1>Está tudo pronto</h1>
+          <p>Partilha fedha.live/kiami na tua próxima live. As mensagens tocam assim que forem pagas.</p>
+          <div className="track">
+            {["Perfil e link", "Plataformas", "Preços", "Widget de alerta"].map((t) => (
+              <div key={t}><span className="b done" /><b className="grow" style={{ fontWeight: 500 }}>{t}</b></div>
+            ))}
+            <div><span className="b next" /><b className="grow" style={{ fontWeight: 500 }}>Verificação de identidade</b><span className="tag pend">Para levantar</span></div>
+          </div>
+        </main>
+        <footer>
+          <RouteButton tone="sinal" onClick={() => nav("/verificacao")}>Enviar documentos agora</RouteButton>
+          <button className="btn ghost-light block" style={{ height: 52 }} onClick={() => nav("/painel")}>Ir para o painel</button>
+        </footer>
+      </div>
     );
   }
 
   return (
-    <StepsLayout step={3} title="Onde fazes as tuas lives?" text="Usamos isto para mostrar AO VIVO na tua página e para escolher os widgets certos.">
-      <h1>Plataformas</h1>
+    <StepsLayout step={3} title="Onde fazes as tuas lives?" text="Usamos isto para mostrar AO VIVO na tua página e para escolher os widgets certos."
+      foot={<>
+        <RouteButton disabled={!any} onClick={() => setDone(true)}>Continuar</RouteButton>
+        <button className="link" style={{ alignSelf: "center", fontSize: 14 }} onClick={() => nav("/painel")}>Saltar por agora</button>
+      </>}>
+      <h1 className="d-only">Plataformas</h1>
+      <h1 className="m-only">Onde fazes as tuas lives?</h1>
+      <p className="muted m-only" style={{ marginTop: -6 }}>Usamos isto para mostrar AO VIVO na tua página quando estiveres em directo.</p>
       {list.map((p) => (
         <div key={p.key} className="talao" style={p.on ? { boxShadow: "0 0 0 1.5px var(--verde) inset" } : undefined}>
           <div className="corpo"><span className="nome">{p.name}</span><div className="mono muted" style={{ fontSize: 12, marginTop: 4 }}>{p.handle || "@o_teu_canal"}</div></div>
@@ -57,8 +61,7 @@ export default function Onboarding() {
           </div>
         </div>
       ))}
-      <RouteButton disabled={!any} onClick={() => setDone(true)}>Continuar</RouteButton>
-      <button className="link" style={{ alignSelf: "center", fontSize: 14 }} onClick={() => nav("/painel")}>Saltar por agora</button>
+      <p className="muted m-only" style={{ fontSize: 13 }}>A seguir: preços das mensagens e ligação do widget.</p>
       {edit && (
         <Modal title={`Ligar ${edit.name}`} onClose={() => setEdit(null)}>
           <label className="field"><span className="lbl">O teu canal</span>

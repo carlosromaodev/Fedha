@@ -98,11 +98,11 @@ export const pastGoals = [
 export interface LedgerRow { at: string; origin: string; gross: number; fee: number; net: number; status: "pendente" | "disponivel" | "reembolsado"; until?: string }
 export const ledger: LedgerRow[] = [
   { at: "14/11/2026 21:04", origin: "Luana · texto", gross: 500, fee: 50, net: 450, status: "pendente", until: "16/11" },
-  { at: "14/11/2026 20:51", origin: "DJ Nelo · texto", gross: 2500, fee: 250, net: 2250, status: "pendente", until: "16/11" },
-  { at: "14/11/2026 20:40", origin: "Mauro A. · áudio", gross: 10000, fee: 1000, net: 9000, status: "pendente", until: "16/11" },
-  { at: "14/11/2026 20:12", origin: "Anónimo · áudio", gross: 5000, fee: 0, net: 0, status: "reembolsado" },
+  { at: "14/11/2026 20:51", origin: "DJ Nelo · texto + prioridade", gross: 2500, fee: 250, net: 2250, status: "pendente", until: "16/11" },
+  { at: "14/11/2026 20:40", origin: "Mauro A. · áudio 30 s", gross: 10000, fee: 1000, net: 9000, status: "pendente", until: "16/11" },
+  { at: "14/11/2026 20:12", origin: "Anónimo · áudio 10 s", gross: 5000, fee: 0, net: 0, status: "reembolsado" },
   { at: "12/11/2026 22:30", origin: "Joana M. · texto", gross: 1500, fee: 150, net: 1350, status: "disponivel" },
-  { at: "12/11/2026 21:58", origin: "Edvaldo · áudio", gross: 8000, fee: 800, net: 7200, status: "disponivel" },
+  { at: "12/11/2026 21:58", origin: "Edvaldo · áudio 20 s", gross: 8000, fee: 800, net: 7200, status: "disponivel" },
 ];
 export const wallet = { available: 184320, pending: 46800, releaseAt: "15/11/2026 · 22:10", monthNet: 412650, monthGross: 458500, monthFee: 45850, withdrawFee: 300 };
 

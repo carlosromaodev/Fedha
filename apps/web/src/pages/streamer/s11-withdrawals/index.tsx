@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Link } from "react-router-dom";
 import { Topbar } from "../../../layouts";
 import { CodeInput, Modal, RouteButton, Stat, Tag, useToast } from "../../../shared/ui";
 import { ledger, wallet } from "../../../shared/mocks/data";
@@ -19,7 +20,7 @@ export default function Wallet() {
 
   return (
     <>
-      <Topbar title="Carteira">
+      <Topbar title="Carteira" sub="Pendente 48 h, depois disponível para levantar">
         <div style={{ width: 150 }}><RouteButton size="sm" onClick={() => setOpen(true)}>Levantar</RouteButton></div>
       </Topbar>
       <div className="page">
@@ -28,16 +29,17 @@ export default function Wallet() {
           <Stat label="Pendente · 48 h" value={wallet.pending} sub={`Próxima libertação: ${wallet.releaseAt}`} />
           <Stat label="Novembro · líquido" value={wallet.monthNet} sub={`Bruto ${kz(wallet.monthGross)} · taxa ${kz(wallet.monthFee)}`} />
         </div>
-        <div className="card table-wrap" style={{ padding: 0 }}>
-          <table className="table">
-            <thead><tr><th>Data</th><th>Origem</th><th className="num">Bruto</th><th className="num">Taxa</th><th className="num">Líquido</th><th className="num">Estado</th></tr></thead>
+        <div className="card table-wrap" style={{ padding: "18px 20px 8px" }}>
+          <div className="row between"><h2>Movimentos</h2><Link to="/painel/historico">Ver histórico completo</Link></div>
+          <table className="table" style={{ marginTop: 8 }}>
+            <thead><tr><th>Data</th><th>Origem</th><th className="num">Bruto</th><th className="num">Taxa 10%</th><th className="num">Líquido</th><th className="num">Estado</th></tr></thead>
             <tbody>
               {ledger.map((r) => (
                 <tr key={r.at + r.origin}>
                   <td className="mono muted" style={{ fontSize: 12.5 }}>{r.at}</td>
                   <td>{r.origin}</td>
                   <td className="num kz">{kz(r.gross)}</td>
-                  <td className="num kz muted">{kz(r.fee)}</td>
+                  <td className="num mono muted">{r.fee ? `−${kz(r.fee, false)}` : "0"}</td>
                   <td className="num kz">{kz(r.net)}</td>
                   <td className="num">
                     {r.status === "pendente" ? <Tag tone="pend">Pendente · {r.until}</Tag> : r.status === "disponivel" ? <Tag tone="ok">Disponível</Tag> : <Tag tone="erro">Reembolsado · falha</Tag>}
@@ -47,11 +49,11 @@ export default function Wallet() {
             </tbody>
           </table>
         </div>
-        <p className="hint">As receitas ficam pendentes 48 h antes de passarem a disponíveis. Os reembolsos só acontecem por falha técnica.</p>
+
       </div>
 
       {open && (
-        <Modal title="Confirmar levantamento" onClose={() => setOpen(false)}>
+        <Modal title="Confirmar levantamento" onClose={() => setOpen(false)} closable>
           <div className="stack" style={{ gap: 12 }}>
             <span className="eyebrow">Destino</span>
             <div className="grid g2" style={{ gridTemplateColumns: "1fr 1fr" }}>

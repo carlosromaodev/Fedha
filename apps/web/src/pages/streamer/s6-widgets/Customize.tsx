@@ -145,8 +145,8 @@ function AlertSettings() {
             </div>
             <div className="card">
               <span className="eyebrow">Link do widget</span>
-              <div className="row between" style={{ marginTop: 8, gap: 12 }}>
-                <span className="mono">{publicWidgetLink(w)}</span>
+              <div className="row between" style={{ marginTop: 8, gap: 12, flexWrap: "wrap" }}>
+                <span className="mono ellipsis" style={{ minWidth: 0 }}>{publicWidgetLink(w)}</span>
                 <span className="row" style={{ gap: 12 }}><button className="link" onClick={() => { copy(widgetUrl(w, { dest: destination })); toast.show("Link copiado"); }}>Copiar</button><button className="link" onClick={() => regenerate("w1").then(() => toast.show("Link antigo revogado. Cola o novo no programa."), (e) => toast.show(`Falhou: ${(e as Error).message}`))}>Gerar novo</button></span>
               </div>
               <p className="hint">Posição e tamanho: ajusta a camada no programa de transmissão. Recomendado: 1080×1920 no TikTok LIVE Studio, 1920×1080 no OBS.</p>

@@ -143,7 +143,7 @@ export function CodeInput({ length = 6, onComplete, error }: { length?: number; 
   );
 }
 
-export function Modal({ title, onClose, children }: { title: string; onClose: () => void; children: ReactNode }) {
+export function Modal({ title, onClose, closable, children }: { title: string; onClose: () => void; closable?: boolean; children: ReactNode }) {
   useEffect(() => {
     const k = (e: KeyboardEvent) => e.key === "Escape" && onClose();
     window.addEventListener("keydown", k);
@@ -152,7 +152,10 @@ export function Modal({ title, onClose, children }: { title: string; onClose: ()
   return (
     <div className="backdrop" onMouseDown={(e) => e.target === e.currentTarget && onClose()}>
       <div className="modal" role="dialog" aria-modal="true" aria-label={title}>
-        <h2>{title}</h2>
+        <div className="row between" style={{ alignItems: "baseline", gap: 12 }}>
+          <h2>{title}</h2>
+          {closable && <button className="icon-btn" style={{ fontSize: 13 }} onClick={onClose}>Fechar ×</button>}
+        </div>
         {children}
       </div>
     </div>
