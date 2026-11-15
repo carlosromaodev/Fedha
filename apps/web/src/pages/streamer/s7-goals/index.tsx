@@ -38,7 +38,7 @@ export default function Goals() {
         <span className="eyebrow">Anteriores</span>
         <div className="card lines" style={{ padding: "0 20px" }}>
           {pastGoals.map((g) => (
-            <div key={g.title} className="row between" style={{ gap: 12 }}>
+            <div key={g.title} className="row between" style={{ gap: 12, flexWrap: "wrap" }}>
               <div><b style={{ fontWeight: 500 }}>{g.title}</b><br /><small className="mono muted">{g.endedAt}</small></div>
               <span className="kz" style={{ fontSize: 13 }}>{kz(g.current)} / {kz(g.target)}</span>
               <Tag tone={g.done ? "ok" : undefined}>{g.done ? "Atingida" : "Não atingida"}</Tag>
