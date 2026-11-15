@@ -23,13 +23,13 @@ body { font-family: var(--font); color: var(--tinta); -webkit-font-smoothing: an
 .zone-side { position: absolute; transition: opacity .3s, transform .3s; }
 .zone-side.dim { opacity: .35; transform: translateY(.4em); }
 .sc-c1 .zone-side.w2 { left: 2%; right: 2%; bottom: 4%; }
-.sc-c1 .zone-side.w3 { right: 3%; top: 4%; width: 20em; }
-.sc-c1 .zone-side.w4 { left: 3%; bottom: 5%; width: 22em; }
+.sc-c1 .zone-side.w4 { right: 3%; top: 4%; width: 20em; }
+.sc-c1 .zone-side.w3 { left: 3%; bottom: 5%; width: 22em; }
 .sc-c1 .zone-side.w5 { right: 3%; bottom: 5%; }
 .sc-c2 .zone-side { left: 6%; right: 6%; top: 40%; }
-.sc-c2 .zone-side.w4 { top: auto; bottom: 37%; }
+.sc-c2 .zone-side.w3 { top: auto; bottom: 37%; }
 .sc-c3 .zone-side, .sc-c4 .zone-side { left: 4%; right: 4%; bottom: 3%; }
-.sc-c3 .zone-side.w3 { top: 3%; bottom: auto; }
+.sc-c3 .zone-side.w4 { top: 3%; bottom: auto; }
 .sc-c1 .zone-side.w6, .sc-c2 .zone-side.w6, .sc-c3 .zone-side.w6 { top: auto; bottom: 4%; }
 
 .brand { font-size: .7em; letter-spacing: -0.02em; color: var(--branco); white-space: nowrap; }
@@ -110,32 +110,32 @@ body { font-family: var(--font); color: var(--tinta); -webkit-font-smoothing: an
 .w2.th-noite { background: var(--verde-fundo); color: var(--branco); }
 .w2.th-noite .bars i { background: rgba(255,255,255,.15); } .w2.th-noite .bars i.on, .w2.th-noite .track i { background: var(--accent); }
 
-/* ----------------------------------------------------------- W3 · ranking */
-.w3 { background: var(--branco); border-radius: .8em; padding: .6em .5em; box-shadow: 0 .3em 1.2em rgba(0,0,0,.25); }
-.w3 small { display: block; padding: 0 .6em .3em; font: 500 .45em var(--mono); letter-spacing: .1em; text-transform: uppercase; color: #7d8b84; }
-.w3 .r { display: flex; align-items: center; gap: .6em; padding: .35em .6em; border-radius: .4em; font-size: .7em; transition: transform .4s; }
-.w3 .r .i { font: 500 .85em var(--mono); width: 1em; }
-.w3 .r .n { flex: 1; font-weight: 600; }
-.w3 .r .v { font: 500 .85em var(--mono); }
-.w3 .r.first { background: var(--accent); font-size: .85em; }
-.w3.swap .r.first { animation: lead .8s ease-out; }
+/* ----------------------------------------------------------- W4 · top doadores */
+.rank { background: var(--branco); border-radius: .8em; padding: .6em .5em; box-shadow: 0 .3em 1.2em rgba(0,0,0,.25); }
+.rank small { display: block; padding: 0 .6em .3em; font: 500 .45em var(--mono); letter-spacing: .1em; text-transform: uppercase; color: #7d8b84; }
+.rank .r { display: flex; align-items: center; gap: .6em; padding: .35em .6em; border-radius: .4em; font-size: .7em; transition: transform .4s; }
+.rank .r .i { font: 500 .85em var(--mono); width: 1em; }
+.rank .r .n { flex: 1; font-weight: 600; }
+.rank .r .v { font: 500 .85em var(--mono); }
+.rank .r.first { background: var(--accent); font-size: .85em; }
+.rank.swap .r.first { animation: lead .8s ease-out; }
 @keyframes lead { 0% { transform: translateY(150%) } 100% { transform: none } }
-.w3.th-noite { background: var(--verde-fundo); color: var(--branco); } .w3.th-noite .r.first { color: var(--tinta); }
+.rank.th-noite { background: var(--verde-fundo); color: var(--branco); } .rank.th-noite .r.first { color: var(--tinta); }
 
-/* ----------------------------------------------------------- W4 · últimas mensagens */
-.w4.list { display: flex; flex-direction: column; gap: .35em; }
-.w4 .row { display: flex; background: var(--branco); border-radius: .4em; overflow: hidden; box-shadow: 0 .2em .8em rgba(0,0,0,.2); }
-.w4 .row .t { flex: 1; min-width: 0; padding: .35em .6em; display: flex; flex-direction: column; font-size: .6em; }
-.w4 .row .t span { color: #4b5a53; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.w4 .row .v { display: grid; place-items: center; width: 4.4em; background: var(--accent); border-left: 1px dashed var(--tinta); font: 500 .62em var(--mono); }
-.w4 .row.fresh { animation: fresh .5s ease-out; }
+/* ----------------------------------------------------------- W3 · últimas mensagens */
+.last.list { display: flex; flex-direction: column; gap: .35em; }
+.last .row { display: flex; background: var(--branco); border-radius: .4em; overflow: hidden; box-shadow: 0 .2em .8em rgba(0,0,0,.2); }
+.last .row .t { flex: 1; min-width: 0; padding: .35em .6em; display: flex; flex-direction: column; font-size: .6em; }
+.last .row .t span { color: #4b5a53; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.last .row .v { display: grid; place-items: center; width: 4.4em; background: var(--accent); border-left: 1px dashed var(--tinta); font: 500 .62em var(--mono); }
+.last .row.fresh { animation: fresh .5s ease-out; }
 @keyframes fresh { from { opacity: 0; transform: translateY(-60%) } }
-.w4.ticker { display: flex; align-items: center; background: var(--branco); border-radius: 2em; overflow: hidden; font-size: .6em; box-shadow: 0 .2em .8em rgba(0,0,0,.25); }
-.w4 .lab { flex: none; padding: .7em 1.2em; background: var(--accent); font: 500 .75em var(--mono); letter-spacing: .1em; text-transform: uppercase; }
-.w4 .belt { flex: 1; overflow: hidden; white-space: nowrap; }
-.w4 .move { display: inline-block; padding-left: 1em; animation: tick 30s linear infinite; }
-.w4 .move.still { animation: none; }
-.w4 .it { margin-right: 2.5em; } .w4 .it em { font: 500 .9em var(--mono); color: var(--verde); font-style: normal; }
+.last.ticker { display: flex; align-items: center; background: var(--branco); border-radius: 2em; overflow: hidden; font-size: .6em; box-shadow: 0 .2em .8em rgba(0,0,0,.25); }
+.last .lab { flex: none; padding: .7em 1.2em; background: var(--accent); font: 500 .75em var(--mono); letter-spacing: .1em; text-transform: uppercase; }
+.last .belt { flex: 1; overflow: hidden; white-space: nowrap; }
+.last .move { display: inline-block; padding-left: 1em; animation: tick 30s linear infinite; }
+.last .move.still { animation: none; }
+.last .it { margin-right: 2.5em; } .last .it em { font: 500 .9em var(--mono); color: var(--verde); font-style: normal; }
 @keyframes tick { to { transform: translateX(-50%) } }
 
 /* ----------------------------------------------------------- W5 · QR */
@@ -154,5 +154,5 @@ body { font-family: var(--font); color: var(--tinta); -webkit-font-smoothing: an
 
 @media (prefers-reduced-motion: reduce) {
   .w1, .w1.in, .w1.out { transform: none !important; transition: opacity 300ms linear !important; }
-  .sparks, .w4 .move { animation: none !important; }
+  .sparks, .last .move { animation: none !important; }
 }

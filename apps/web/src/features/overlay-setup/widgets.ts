@@ -24,8 +24,8 @@ export const SITE_URL = ((import.meta.env.VITE_PUBLIC_URL as string | undefined)
 export const WIDGETS: WidgetDef[] = [
   { id: "w1", n: 1, name: "Alerta de mensagem", desc: "Mostra e lê cada mensagem", token: "a8f3c71e", conn: "aberto", where: "LIVE Studio" },
   { id: "w2", n: 2, name: "Meta de doação", desc: "Barra da meta ativa", token: "9d04b2aa", conn: "aberto", where: "LIVE Studio" },
-  { id: "w3", n: 3, name: "Ranking", desc: "Top doadores da live", token: "e6a21c90", conn: "fechado" },
-  { id: "w4", n: 4, name: "Últimas mensagens", desc: "Lista ou faixa a rolar", token: "51be7f03", conn: "a_religar" },
+  { id: "w3", n: 3, name: "Últimas mensagens", desc: "Lista ou faixa a rolar", token: "51be7f03", conn: "a_religar" },
+  { id: "w4", n: 4, name: "Top doadores", desc: "Por live, dia ou mês", token: "e6a21c90", conn: "fechado" },
   { id: "w5", n: 5, name: "QR code", desc: "Para a tua página", token: "77c0d1e4", conn: "fechado" },
   { id: "w6", n: 6, name: "Combinado", desc: "Alerta e meta numa só camada", token: "c3f9a018", conn: "fechado" },
 ];

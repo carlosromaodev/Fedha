@@ -190,16 +190,16 @@ function OtherWidgets({ focus }: { focus: string }) {
             <Row label={`Mostrar "+ valor" a flutuar`}><T c /></Row>
             <Link to="/painel/metas" style={{ fontSize: 13 }}>Gerir metas</Link>
           </div>
-          <div className={box("w3")}>
-            <h2><span className="mono muted" style={{ fontSize: 12, marginRight: 8 }}>W3</span>Ranking</h2>
+          <div className={box("w4")}>
+            <h2><span className="mono muted" style={{ fontSize: 12, marginRight: 8 }}>W4</span>Top doadores</h2>
             <Row label="Período"><Seg label="Período" value={period} onChange={setPeriod} options={[["live", "Live"], ["dia", "Dia"], ["mes", "Mês"]]} /></Row>
             <Row label="Mostrar totais"><T c /></Row>
             <Row label="C1"><span>Top 5</span></Row>
             <Row label="C2 e C3"><span>Top 3</span></Row>
             <Row label={`Incluir "Anónimo"`}><T c={false} /></Row>
           </div>
-          <div className={box("w4")}>
-            <h2><span className="mono muted" style={{ fontSize: 12, marginRight: 8 }}>W4</span>Últimas mensagens</h2>
+          <div className={box("w3")}>
+            <h2><span className="mono muted" style={{ fontSize: 12, marginRight: 8 }}>W3</span>Últimas mensagens</h2>
             <Row label="C1"><span>Lista de 5</span></Row>
             <Row label="C2 e C3"><span>Ticker</span></Row>
             <Row label="Velocidade do ticker"><Seg label="Velocidade" value={speed} onChange={setSpeed} options={[["lenta", "Lenta"], ["normal", "Normal"]]} /></Row>

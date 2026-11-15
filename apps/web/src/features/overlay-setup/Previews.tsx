@@ -44,7 +44,7 @@ export function WidgetPreview({ id, theme = "claro", disabled }: { id: WidgetId;
           </div>
         </div>
       )}
-      {id === "w3" && (
+      {id === "w4" && (
         <div className={cx("pv-card", `th-${theme}`)} style={{ width: "60%", fontSize: 11 }}>
           <div className="pv-hd"><span className="brand"><b>Fedha</b> LIVE</span><span className="eyebrow" style={{ color: "rgba(255,255,255,.7)", fontSize: 8 }}>Top 5 · esta live</span></div>
           <div style={{ padding: 6 }}>
@@ -56,7 +56,7 @@ export function WidgetPreview({ id, theme = "claro", disabled }: { id: WidgetId;
           </div>
         </div>
       )}
-      {id === "w4" && (
+      {id === "w3" && (
         <div className="pv-ticker"><span className="lab"><b>Fedha</b> LIVE</span><span className="it"><b>DJ Nelo</b> <em>2.500 Kz</em> Ya mano, essa jogada foi mesmo à Kuduro 😂</span></div>
       )}
       {id === "w5" && (

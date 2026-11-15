@@ -27,8 +27,9 @@ const hasAlert = cfg.widget === 1 || cfg.widget === 6;
 
 function render() {
   if (cfg.widget === 2 || cfg.widget === 6) renderGoal(sideZone, state, cfg);
-  if (cfg.widget === 3) renderRanking(sideZone, state, cfg);
-  if (cfg.widget === 4) renderLatest(sideZone, state, cfg);
+  // RF-WID-08: W3 últimas mensagens, W4 top doadores.
+  if (cfg.widget === 3) renderLatest(sideZone, state, cfg);
+  if (cfg.widget === 4) renderRanking(sideZone, state, cfg);
   if (cfg.widget === 5) renderQr(sideZone, cfg);
 }
 
