@@ -61,6 +61,8 @@ export const streamers = pgTable("streamers", {
   id: text("id").primaryKey(),
   userId: text("user_id").notNull(),
   handle: text("handle").notNull(),
+  /** RN-CON-03: o nome de utilizador só muda 1 vez a cada 30 dias. */
+  handleChangedAt: ts("handle_changed_at"),
   displayName: text("display_name").notNull(),
   bio: text("bio").notNull().default(""),
   avatarUrl: text("avatar_url"),
@@ -76,7 +78,8 @@ export const streamers = pgTable("streamers", {
   device: text("device"), // pc | telemovel
   outputMode: text("output_mode").notNull().default("overlay"), // overlay | audio_only
   queueOrder: text("queue_order").notNull().default("arrival"), // arrival | amount
-  intervalSeconds: integer("interval_seconds").notNull().default(3),
+  /** Intervalo entre mensagens, 0–5000 ms (RN-FIL-06). */
+  intervalMs: integer("interval_ms").notNull().default(1500),
   volume: integer("volume").notNull().default(80),
   alertSettings: jsonb("alert_settings").$type<Record<string, unknown>>().notNull().default({}),
   feePercent: integer("fee_percent"),

@@ -1,5 +1,5 @@
 {
-  "id": "b18b9f0a-4ecf-43eb-be1b-373f2a90f229",
+  "id": "0cc4872a-b4e8-43e8-9e1f-5f16e96ab7a5",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -1975,6 +1975,12 @@
           "primaryKey": false,
           "notNull": true
         },
+        "handle_changed_at": {
+          "name": "handle_changed_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
         "display_name": {
           "name": "display_name",
           "type": "text",
@@ -2075,12 +2081,12 @@
           "notNull": true,
           "default": "'arrival'"
         },
-        "interval_seconds": {
-          "name": "interval_seconds",
+        "interval_ms": {
+          "name": "interval_ms",
           "type": "integer",
           "primaryKey": false,
           "notNull": true,
-          "default": 3
+          "default": 1500
         },
         "volume": {
           "name": "volume",

@@ -66,7 +66,7 @@ export function profileView(ctx: Ctx, s: Streamer): StreamerProfile {
     socials: s.socials, thankYouMessage: s.thankYouMessage, showTopDonors: s.showTopDonors, showRecentMessages: s.showRecentMessages,
     offlineBehavior: s.offlineBehavior as "queue" | "block", acceptingMessages: s.acceptingMessages, isLive: isEffectivelyLive(ctx, s),
     platform: s.platform as Platform | null, device: s.device as Device | null, outputMode: s.outputMode as "overlay" | "audio_only",
-    queueOrder: s.queueOrder as "arrival" | "amount", intervalSeconds: s.intervalSeconds, volume: s.volume,
+    queueOrder: s.queueOrder as "arrival" | "amount", intervalMs: s.intervalMs, volume: s.volume,
     kycStatus: s.kycStatus as StreamerProfile["kycStatus"], publicUrl: `${ctx.env.PUBLIC_WEB_URL}/${s.handle}`,
     onboardingCompleted: !!s.onboardingCompletedAt,
   };

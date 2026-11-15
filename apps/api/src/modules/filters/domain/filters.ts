@@ -17,7 +17,9 @@ function deobfuscate(text: string) {
     .normalize("NFD")
     .replace(/[̀-ͯ]/g, "")
     .replace(/\s*[\[(]\s*(dot|ponto)\s*[\])]\s*|\s+(dot|ponto)\s+/g, ".")
-    .replace(/\s*[\[(]\s*(at|arroba)\s*[\])]\s*|\s+arroba\s+/g, "@");
+    .replace(/\s*[\[(]\s*(at|arroba)\s*[\])]\s*|\s+arroba\s+/g, "@")
+    // "fedha . live" → "fedha.live" (só com espaço dos dois lados do ponto e um domínio a seguir)
+    .replace(new RegExp(`\\s+\\.\\s+(?=(${TLDS})\\b)`, "g"), ".");
 }
 
 const LEET: Record<string, string> = { "0": "o", "1": "i", "3": "e", "4": "a", "5": "s", "7": "t", "@": "a", $: "s" };

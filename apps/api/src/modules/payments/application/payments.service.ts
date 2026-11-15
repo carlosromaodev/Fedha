@@ -2,6 +2,7 @@ import { and, desc, eq, inArray, isNull, lt, ne } from "drizzle-orm";
 import type { CreatePaymentBody } from "@fedha/contracts";
 import { schema, type DbOrTx } from "../../../shared/database/client";
 import type { Ctx } from "../../../shared/context";
+import { assertNotSelfPayment } from "../../fraud/application/fraud.service";
 import { AppError, badRequest, conflict, notFound, unauthorized, unprocessable } from "../../../shared/errors/app-error";
 import { uuid } from "../../../shared/security/ids";
 import { audit } from "../../../shared/audit/audit";
@@ -32,6 +33,7 @@ export async function createPayment(ctx: Ctx, orderId: string, body: CreatePayme
   if (["mcx", "unitel_money", "afrimoney"].includes(body.method) && !body.phone)
     throw unprocessable("phone_required", "Indica o número de telemóvel associado à conta.", { field: "phone" });
 
+  await assertNotSelfPayment(ctx, order.streamerId, body.phone, order.id);
   const ttl = TTL_MIN[body.method](settings);
   const expiresAt = new Date(now.getTime() + ttl * 60_000);
   const gateway = ctx.gateways.forMethod(body.method);

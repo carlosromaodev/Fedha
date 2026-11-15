@@ -9,6 +9,7 @@ import { getSettings } from "../../admin/application/settings";
 import { getPricing } from "../../pricing/application/pricing.service";
 import { normalizeText, priceMessage } from "../../pricing/domain/pricing";
 import { checkMessageText, isDonorBlocked } from "../../filters/application/filters.service";
+import { assertNotSelfPayment } from "../../fraud/application/fraud.service";
 import { acceptState, streamerByHandle, streamerById } from "../../streamers/application/streamers.service";
 import { sortQueue } from "../../queue/domain/ordering";
 
@@ -46,6 +47,7 @@ export async function createOrder(ctx: Ctx, handle: string, body: CreateOrderBod
     if (hit) throw unprocessable("filter_blocked", hit.message, { field, hit });
   }
 
+  await assertNotSelfPayment(ctx, s.id, body.phone);
   if (await isDonorBlocked(ctx, s.id, body.phone, body.deviceId))
     throw forbidden("Não é possível enviar mensagens a este streamer a partir deste número ou dispositivo.", "donor_blocked");
 
@@ -110,7 +112,7 @@ export async function queuePosition(ctx: Ctx, o: Order) {
   const sorted = sortQueue(queued, s.queueOrder as "arrival" | "amount");
   const idx = sorted.findIndex((x) => x.id === o.id);
   const ahead = sorted.slice(0, idx);
-  const wait = ahead.reduce((sum, x) => sum + Math.ceil((x.durationMs ?? 8000) / 1000) + s.intervalSeconds, 0);
+  const wait = ahead.reduce((sum, x) => sum + Math.ceil(((x.durationMs ?? 8000) + s.intervalMs) / 1000), 0);
   return { position: idx + 1, wait };
 }
 

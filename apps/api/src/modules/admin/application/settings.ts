@@ -10,10 +10,10 @@ export const DEFAULT_SETTINGS: PlatformSettings = {
   retentionHours: 48,
   cardRetentionHours: 24 * 7,
   manualReviewAbove: 500_000,
-  newAccountDays: 14,
+  newAccountDays: 30, // RN-LEV-05
   kycUnverifiedLimit: 50_000,
-  donorDailyMaxMessages: 30,
-  donorDailyMaxAmount: 200_000,
+  donorDailyMaxMessages: 20, // RN-FRA-01
+  donorDailyMaxAmount: 100_000,
   mcxTtlMinutes: 5,
   referenceTtlMinutes: 60,
   activeMethods: ["mcx", "reference"],

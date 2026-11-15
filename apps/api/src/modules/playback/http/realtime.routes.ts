@@ -47,6 +47,7 @@ export async function realtimeRoutes(app: FastifyInstance, ctx: Ctx) {
     void playback.pushWidgetData(ctx, s.id, conn);
     void playback.engine(ctx).pump(s.id);
 
+    socket.on("pong", () => { conn.lastPingAt = new Date(); });
     socket.on("message", async (raw: Buffer) => {
       let msg;
       try { msg = OverlayClientMessage.parse(JSON.parse(raw.toString())); } catch { return; }
@@ -90,6 +91,18 @@ export async function realtimeRoutes(app: FastifyInstance, ctx: Ctx) {
     });
     socket.on("close", () => ctx.hub.removeDashboard(id));
   });
+
+  // RNF-02: heartbeat a cada 20 s (ping do protocolo WebSocket, que o navegador responde sozinho).
+  // Uma saída sem resposta há 60 s passa a desligada e a mensagem em curso volta à fila.
+  const heartbeat = setInterval(() => {
+    const limit = Date.now() - 60_000;
+    for (const c of ctx.hub.allOutputs()) {
+      if (c.lastPingAt.getTime() < limit) c.socket.terminate();
+      else try { c.socket.ping(); } catch { /* ligação a fechar */ }
+    }
+  }, 20_000);
+  heartbeat.unref();
+  app.addHook("onClose", async () => clearInterval(heartbeat));
 
   // Quando uma saída liga ou desliga, o painel recebe o novo estado (inclui o aviso "aberto em 2 sítios").
   ctx.hub.onOutputsChanged = (streamerId) => {

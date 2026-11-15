@@ -1,11 +1,21 @@
 import { and, desc, eq, gte, inArray, isNull, sql } from "drizzle-orm";
 import { schema } from "../../../shared/database/client";
 import type { Ctx } from "../../../shared/context";
-import { notFound } from "../../../shared/errors/app-error";
+import { forbidden, notFound } from "../../../shared/errors/app-error";
 import { uuid } from "../../../shared/security/ids";
 import { audit } from "../../../shared/audit/audit";
 import { getSettings } from "../../admin/application/settings";
 import { blockDonor } from "../../filters/application/filters.service";
+
+/** RN-FRA-02: o streamer não pode pagar mensagens para a própria página. Bloqueia e sinaliza. */
+export async function assertNotSelfPayment(ctx: Ctx, streamerId: string, phone: string | null | undefined, orderId?: string) {
+  if (!phone) return;
+  const s = await ctx.db.query.streamers.findFirst({ where: eq(schema.streamers.id, streamerId) });
+  const owner = s ? await ctx.db.query.users.findFirst({ where: eq(schema.users.id, s.userId) }) : null;
+  if (owner?.phone !== phone) return;
+  await raise(ctx, { kind: "self_donation", severity: "high", streamerId, donorPhone: phone, orderId });
+  throw forbidden("Não podes enviar mensagens pagas para a tua própria página.", "self_payment");
+}
 
 async function raise(ctx: Ctx, a: { kind: string; severity: "low" | "medium" | "high"; streamerId?: string; donorPhone?: string | null; orderId?: string; data?: Record<string, unknown> }) {
   // Evita repetir o mesmo alerta aberto para o mesmo par.

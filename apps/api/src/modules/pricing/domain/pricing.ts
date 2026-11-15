@@ -35,6 +35,9 @@ export interface PriceResult {
   premium: boolean;
 }
 
+/** RN-PRE-07: mínimo da plataforma por mensagem. */
+export const PLATFORM_MIN_AMOUNT = 100;
+
 export function maxChars(p: PricingConfig) {
   return p.textTiers[p.textTiers.length - 1]!.maxChars;
 }
@@ -83,7 +86,9 @@ export function priceMessage(p: PricingConfig, input: ComposeInput): PriceResult
   }
 
   const total = lines.reduce((s, l) => s + l.kz, 0);
-  if (!problem && total < p.minAmount)
-    problem = { code: "below_minimum", message: `O valor mínimo por mensagem é ${formatKz(p.minAmount)}.` };
+  // RN-PRE-07: nunca abaixo do mínimo do streamer nem do mínimo da plataforma.
+  const min = Math.max(p.minAmount, PLATFORM_MIN_AMOUNT);
+  if (!problem && total < min)
+    problem = { code: "below_minimum", message: `O valor mínimo por mensagem é ${formatKz(min)}.` };
   return { lines, total, chars, nextTier, problem, premium };
 }

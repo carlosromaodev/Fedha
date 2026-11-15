@@ -5,11 +5,11 @@ import { and, desc, eq, gte, ilike, inArray, lte, or, sql } from "drizzle-orm";
 import {
   BlockDonorBody, CreateGoalBody, CreateTicketBody, CreateWithdrawalBody, DashboardQuery, HistoryQuery, InviteAssistantBody, LedgerQuery, MarkReadBody,
   NotificationPrefs, OnboardingBody, PlaybackSettingsBody, RefundRequestBody, ReportBody, SetLiveBody, TicketMessageBody, UpdateFiltersBody,
-  UpdateProfileBody, UpdateWidgetBody, WidgetKind, WithdrawalQuoteQuery,
+  Handle, UpdateProfileBody, UpdateWidgetBody, WidgetKind, WithdrawalQuoteQuery,
 } from "@fedha/contracts";
 import type { Ctx } from "../../../shared/context";
 import { schema } from "../../../shared/database/client";
-import { notFound, unprocessable } from "../../../shared/errors/app-error";
+import { AppError, notFound, unprocessable } from "../../../shared/errors/app-error";
 import { uuid } from "../../../shared/security/ids";
 import { audit } from "../../../shared/audit/audit";
 import { ipOf, requireAuth, streamerOf, user } from "../../../shared/http/auth";
@@ -51,6 +51,21 @@ export async function streamerRoutes(app: FastifyInstance, ctx: Ctx) {
     const s = await streamerOf(ctx, req);
     await ctx.db.update(schema.streamers).set(req.body).where(eq(schema.streamers.id, s.id));
     await audit(ctx, { actorId: s.userId, actorType: "streamer", action: "profile.updated", streamerId: s.id, data: { fields: Object.keys(req.body) } });
+    return streamers.profileView(ctx, await streamers.streamerById(ctx, s.id));
+  });
+  /** RN-CON-03: mudar o nome de utilizador (endereço público), no máximo 1 vez a cada 30 dias. */
+  r.put("/v1/streamer/handle", { ...S, schema: { body: z.object({ handle: Handle }) } }, async (req) => {
+    const s = await streamerOf(ctx, req);
+    const handle = req.body.handle;
+    if (handle === s.handle) return streamers.profileView(ctx, s);
+    const last = s.handleChangedAt ?? null;
+    if (last && ctx.now().getTime() - last.getTime() < 30 * 86400_000) {
+      const next = new Date(last.getTime() + 30 * 86400_000);
+      throw new AppError(409, "handle_change_too_soon", `Só podes mudar o nome de utilizador 1 vez a cada 30 dias. Próxima mudança a partir de ${next.toLocaleDateString("pt-AO", { timeZone: "Africa/Luanda" })}.`);
+    }
+    if (!(await streamers.isHandleAvailable(ctx, handle))) throw new AppError(409, "handle_taken", "Este nome de utilizador já está a ser usado.", { field: "handle" });
+    await ctx.db.update(schema.streamers).set({ handle, handleChangedAt: ctx.now() }).where(eq(schema.streamers.id, s.id));
+    await audit(ctx, { actorId: s.userId, actorType: "streamer", action: "profile.handle_changed", streamerId: s.id, data: { before: s.handle, after: handle } });
     return streamers.profileView(ctx, await streamers.streamerById(ctx, s.id));
   });
   for (const kind of ["avatar", "banner"] as const) {

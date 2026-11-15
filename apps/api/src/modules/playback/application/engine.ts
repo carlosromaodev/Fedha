@@ -122,7 +122,7 @@ export class PlaybackEngine {
   }
 
   private async enabledTargets(streamerId: string, outputMode: string) {
-    const conns = this.ctx.hub.outputsOf(streamerId, this.targetKinds(outputMode)).sort((a, b) => a.connectedAt.getTime() - b.connectedAt.getTime());
+    const conns = this.ctx.hub.outputsOf(streamerId, this.targetKinds(outputMode)).sort((a, b) => b.connectedAt.getTime() - a.connectedAt.getTime()); // RN-WID-06: toca o último aberto
     const out: OutputConnection[] = [];
     for (const c of conns) {
       const row = c.tokenId ? await tokenRowById(this.ctx, c.tokenId) : null;
@@ -139,7 +139,7 @@ export class PlaybackEngine {
     clearTimeout(p.timer);
     st.playing = null;
     const s = await streamerById(this.ctx, conn.streamerId);
-    st.nextAt = Date.now() + s.intervalSeconds * 1000;
+    st.nextAt = Date.now() + s.intervalMs;
     const t = this.lastTests.get(conn.streamerId);
     if (t && t.id === id) t.played = true;
     if (p.orderId) {
@@ -185,15 +185,32 @@ export class PlaybackEngine {
     else void this.pump(conn.streamerId);
   }
 
+  /**
+   * A saída não conseguiu tocar. Autoplay bloqueado: volta à fila (o streamer desbloqueia o som).
+   * Áudio que não carrega ou não descodifica: falha técnica com reembolso (RN-WID-05, RN-REE-01).
+   */
   async onError(conn: OutputConnection, id: string, reason: string) {
     const st = this.state(conn.streamerId);
-    if (st.playing?.id === id && st.playing.connId === conn.id) {
+    const p = st.playing;
+    if (!p || p.id !== id || p.connId !== conn.id) return;
+    const technical = reason === "load_failed" || reason === "decode_failed";
+    if (technical && p.orderId) {
+      clearTimeout(p.timer);
+      st.playing = null;
+      st.nextAt = Date.now() + 1000;
+      const { failOrder } = await import("../../payments/application/payments.service");
+      await failOrder(this.ctx, p.orderId, "O áudio da mensagem não carregou na saída do streamer.");
+      await publishSnapshot(this.ctx, conn.streamerId);
+      void this.pump(conn.streamerId);
+    } else {
       await this.release(conn.streamerId, id, reason, 5000);
-      this.ctx.hub.publishDashboard(conn.streamerId, "notification", {
-        id: uuid(), event: "output_error", title: "A saída não conseguiu tocar",
-        body: reason === "autoplay_blocked" ? "O navegador bloqueou o som. Abre o Player e toca em \"Ativar som\"." : "O áudio não carregou. A mensagem voltou para a fila.",
-      });
     }
+    this.ctx.hub.publishDashboard(conn.streamerId, "notification", {
+      id: uuid(), event: "output_error", title: "A saída não conseguiu tocar",
+      body: reason === "autoplay_blocked"
+        ? "O navegador bloqueou o som. Abre o Player e toca em \"Ativar som\"."
+        : "O áudio não carregou. A mensagem foi marcada como falha técnica e o doador vai ser reembolsado.",
+    });
   }
 
   /** Alerta de teste (S6) ou repetição de uma mensagem já tocada (S2). */

@@ -22,7 +22,7 @@ export const StreamerProfile = z.object({
   device: Device.nullable(),
   outputMode: OutputMode,
   queueOrder: z.enum(["arrival", "amount"]),
-  intervalSeconds: z.number().int(),
+  intervalMs: z.number().int(),
   volume: z.number().int(),
   kycStatus: z.enum(["not_started", "pending", "approved", "rejected", "correction_requested"]),
   publicUrl: z.string(),
@@ -54,7 +54,8 @@ export const OnboardingResponse = z.object({
 export const SetLiveBody = z.object({ isLive: z.boolean() });
 export const PlaybackSettingsBody = z.object({
   volume: z.number().int().min(0).max(100),
-  intervalSeconds: z.number().int().min(0).max(60),
+  /** RN-FIL-06: 0 a 5 s, predefinição 1,5 s. */
+  intervalMs: z.number().int().min(0).max(5000),
   queueOrder: z.enum(["arrival", "amount"]),
   outputMode: OutputMode,
 }).partial();

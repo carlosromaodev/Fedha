@@ -103,7 +103,11 @@ export async function buildApp(opts: BuildOptions = {}): Promise<{ app: FastifyI
     },
     credentials: true,
   });
-  await app.register(rateLimit, { max: 300, timeWindow: "1 minute", enableDraftSpec: true });
+  await app.register(rateLimit, {
+    max: 300, timeWindow: "1 minute", enableDraftSpec: true,
+    // Nos testes, os limites só se aplicam a pedidos que os querem testar (cabeçalho x-rate-limit-test).
+    allowList: (req) => env.NODE_ENV === "test" && !req.headers["x-rate-limit-test"],
+  });
   await app.register(multipart, { limits: { fileSize: 8 * 1024 * 1024, files: 5 } });
   await app.register(websocket, { options: { maxPayload: 64 * 1024 } });
 

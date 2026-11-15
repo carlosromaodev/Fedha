@@ -49,6 +49,9 @@ export class RealtimeHub {
     this.lastClosed.set(`${c.streamerId}:${c.kind}`, Date.now());
     this.onOutputsChanged(c.streamerId);
   }
+  allOutputs() {
+    return [...this.outputs.values()];
+  }
   getOutput(id: string) {
     return this.outputs.get(id);
   }
