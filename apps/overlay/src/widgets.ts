@@ -28,7 +28,7 @@ export async function playAlert(host: HTMLElement, a: Alert, cfg: OverlayConfig,
   el.innerHTML = `
     <div class="w1-head">${BRAND}
       ${level !== "normal" ? `<span class="lvl">${level === "super" ? "Super" : "Destaque"}</span>` : ""}
-      ${cfg.showValue && a.showAmount ? `<span class="val"><span class="n">0</span> Kz</span>` : ""}
+      ${cfg.showValue && a.showAmount && a.amountKz > 0 ? `<span class="val"><span class="n">0</span> Kz</span>` : ""}
     </div>
     <div class="w1-body">
       ${cfg.showName ? `<div class="who">${esc(a.donorName)}</div>` : ""}

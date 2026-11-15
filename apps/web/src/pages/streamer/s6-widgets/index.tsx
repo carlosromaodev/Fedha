@@ -22,7 +22,10 @@ export default function Widgets() {
   const qrOff = NO_QR.includes(dest);
   const dup = list.find((w) => w.openCount > 1);
   const test = async () => {
-    try { await sendTest(); toast.show("Alerta de teste enviado. Não é cobrado e não entra no histórico."); }
+    try {
+      const n = await sendTest();
+      toast.show(n ? "Alerta de teste enviado. Não é cobrado e não entra no histórico." : "Nenhum W1 ou W6 está aberto. Cola o link no programa e tenta de novo.");
+    }
     catch (e) { toast.show(`Não foi possível enviar o teste: ${(e as Error).message}`); }
   };
 
@@ -53,8 +56,8 @@ export default function Widgets() {
 
         <div className="wg-grid">
           {list.map((w) => {
-            const off = w.id === "w5" && qrOff;
-            const st = off ? { label: `Desligado · ${PLATFORM_LABEL[dest]}` } : CONN[w.conn];
+            const off = (w.id === "w5" && qrOff) || w.blocked;
+            const st = off ? { label: w.blockedReason ?? `Desligado · ${PLATFORM_LABEL[dest]}` } : CONN[w.conn];
             return (
               <div key={w.id} className={cx("card wg", off && "off")}>
                 <div className="hd">
@@ -62,6 +65,7 @@ export default function Widgets() {
                   <Tag tone={st.tone}>{st.label}{!off && w.where ? ` · ${w.where}` : ""}</Tag>
                 </div>
                 <WidgetPreview id={w.id} theme={w.config.theme} disabled={off} />
+                {w.warning && <p className="hint erro" style={{ marginTop: -4 }}>{w.warning}</p>}
                 <div className="row between">
                   <button className="btn dark sm" disabled={off} onClick={() => { copy(widgetUrl(w, { dest })); toast.show(`Link do W${w.n} copiado. Não o mostres na live.`); }}>Copiar link</button>
                   <div className="row" style={{ gap: 6 }}>

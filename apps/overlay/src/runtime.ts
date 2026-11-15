@@ -53,8 +53,10 @@ export function connect(cfg: OverlayConfig, l: Listener) {
         else if (msg.type === "revoked") { closed = true; l.onConnection("revogado"); ws?.close(); }
       } catch { /* mensagem inválida: ignorar */ }
     };
-    ws.onclose = () => {
+    ws.onclose = (ev) => {
       if (closed) return;
+      // 4001: token inválido ou revogado · 4003: conta suspensa. Nestes casos não vale a pena voltar a tentar.
+      if (ev.code === 4001 || ev.code === 4003) { closed = true; l.onConnection("revogado"); return; }
       l.onConnection("desligado");
       retry = Math.min(retry + 1, 6);
       setTimeout(open, Math.min(30000, 1000 * 2 ** retry));
