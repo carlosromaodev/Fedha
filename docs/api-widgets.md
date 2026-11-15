@@ -7,11 +7,11 @@ Testes de ponta a ponta: `apps/api/test/e2e/widgets.test.ts` (`pnpm --filter @fe
 
 ```bash
 cd apps/api
-SEED_DEMO=true NODE_ENV=development pnpm dev     # http://localhost:4000, base de dados PGlite local
+SEED_DEMO=true NODE_ENV=development pnpm dev     # http://localhost:3333, base de dados PGlite local
 # streamer de demonstração: kiami@fedha.test / fedha2026
 ```
 
-No frontend: `VITE_API_URL=http://localhost:4000`. No overlay: `/o/<token>?w=1&api=http://localhost:4000`.
+No frontend: `VITE_API_URL=http://localhost:3333`. No overlay: `/o/<token>?w=1&api=http://localhost:3333`.
 
 ## WebSocket `/v1/realtime/overlay?token=<token>&w=<1..6>`
 
@@ -59,10 +59,10 @@ Uma mensagem toca numa só saída: se o W1 estiver aberto em dois sítios, só o
 ## Simular uma mensagem paga (fora de produção)
 
 ```bash
-curl -X POST localhost:4000/v1/public/orders -H 'content-type: application/json' \
+curl -X POST localhost:3333/v1/public/orders -H 'content-type: application/json' \
   -d '{"handle":"kiami","kind":"text","text":"Boa noite!","donorName":"Luana","phone":"923456789","acceptTerms":true}'
-curl -X POST localhost:4000/v1/public/orders/<id>/payments -H 'content-type: application/json' -d '{"method":"reference"}'
-curl -X POST localhost:4000/v1/dev/payments/<id do pedido ou do pagamento>/confirm
+curl -X POST localhost:3333/v1/public/orders/<id>/payments -H 'content-type: application/json' -d '{"method":"reference"}'
+curl -X POST localhost:3333/v1/dev/payments/<id do pedido ou do pagamento>/confirm
 ```
 
 Com Multicaixa Express no sandbox: telefone acabado em 000 é recusado, em 999 fica pendente, qualquer outro confirma sozinho ao fim de `SANDBOX_AUTO_CONFIRM_MS` (5 s por omissão).
