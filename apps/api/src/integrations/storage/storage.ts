@@ -1,5 +1,5 @@
 import { mkdir, readFile, rm, writeFile } from "node:fs/promises";
-import { dirname, join, normalize, resolve } from "node:path";
+import { dirname, resolve, sep } from "node:path";
 
 export interface StoredFile {
   data: Buffer;
@@ -15,7 +15,7 @@ export interface Storage {
 }
 
 export const PUBLIC_PREFIXES = ["audio/", "effects/", "images/", "samples/", "proofs/"] as const;
-export const isPublicKey = (key: string) => PUBLIC_PREFIXES.some((p) => key.startsWith(p)) && !key.includes("..");
+export const isPublicKey = (key: string) => PUBLIC_PREFIXES.some((p) => key.startsWith(p)) && !key.includes("..") && !key.includes("\\");
 
 const MIME_BY_EXT: Record<string, string> = {
   wav: "audio/wav", mp3: "audio/mpeg", ogg: "audio/ogg", opus: "audio/ogg", webm: "audio/webm", m4a: "audio/mp4", aac: "audio/aac",
@@ -30,9 +30,11 @@ export class LocalStorage implements Storage {
   constructor(dir: string, private publicBaseUrl: string) {
     this.root = resolve(dir);
   }
+  /** As chaves usam sempre "/" (também no Windows); aqui viram caminho do sistema. */
   private path(key: string) {
-    const p = resolve(this.root, normalize(key));
-    if (!p.startsWith(this.root)) throw new Error("chave inválida");
+    if (key.includes("\\") || key.split("/").some((s) => s === ".." || s === "")) throw new Error("chave inválida");
+    const p = resolve(this.root, ...key.split("/"));
+    if (!p.startsWith(this.root + sep)) throw new Error("chave inválida");
     return p;
   }
   async put(key: string, data: Buffer) {
@@ -70,6 +72,6 @@ export class MemoryStorage implements Storage {
     this.files.delete(key);
   }
   publicUrl(key: string) {
-    return `${this.publicBaseUrl}/media/${join(key)}`;
+    return `${this.publicBaseUrl.replace(/\/$/, "")}/media/${key}`;
   }
 }
