@@ -1,8 +1,8 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Topbar } from "../../../layouts";
-import { LiveBadge, Modal, Stat, Talao, Tag, Volume, Wave, useToast } from "../../../shared/ui";
-import { queue as initial, streamer, type QueueMsg } from "../../../shared/mocks/data";
+import { Modal, Stat, Talao, Tag, Volume, Wave, useToast } from "../../../shared/ui";
+import { assistants, queue as initial, streamer, type QueueMsg } from "../../../shared/mocks/data";
 import { kz, maskPhone } from "../../../shared/lib/format";
 import { LinkBox } from "../../../features/queue/LinkBox";
 
@@ -13,6 +13,8 @@ import { LinkBox } from "../../../features/queue/LinkBox";
 export default function LiveQueue({ readOnly = false }: { readOnly?: boolean }) {
   const [blocked, setBlocked] = useState<string[]>([]);
   const [target, setTarget] = useState<QueueMsg | null>(null);
+  const [menu, setMenu] = useState<string | null>(null);
+  const nav = useNavigate();
   const [vol, setVol] = useState(75);
   const toast = useToast();
   const now = initial.find((q) => q.status === "a_tocar");
@@ -22,9 +24,7 @@ export default function LiveQueue({ readOnly = false }: { readOnly?: boolean }) 
   return (
     <>
       {!readOnly && (
-        <Topbar title="Fila">
-          <span className="hide-m"><LiveBadge>Ao vivo · 01:42:10</LiveBadge></span>
-          <span className="hide-m"><Tag tone="ok">Overlay ligado · OBS</Tag></span>
+        <Topbar title="Fila ao vivo" sub="Tocam por ordem de chegada; prioridade passa à frente. Não é possível parar mensagens já pagas.">
           <LinkBox />
         </Topbar>
       )}
@@ -48,12 +48,20 @@ export default function LiveQueue({ readOnly = false }: { readOnly?: boolean }) 
             <div className="row between"><span className="eyebrow">A seguir · {next.length}</span><span className="mono muted" style={{ fontSize: 12 }}>≈ 1 min 10 s de fila</span></div>
             {next.length === 0 && <div className="card"><p className="muted">A fila está vazia. Partilha fedha.live/{streamer.handle} no chat.</p></div>}
             {next.map((m, i) => (
-              <Talao key={m.id} name={m.donor} meta={<span className="mono muted" style={{ fontSize: 12 }}>{i + 1}</span>}
-                text={m.kind === "audio" ? `Mensagem de voz · 00:${String(m.seconds).padStart(2, "0")}` : m.text} value={m.kz}
-                onMenu={readOnly ? undefined : () => setTarget(m)}>
-                {m.tags.map((t) => <Tag key={t}>{t}</Tag>)}
-                {blocked.includes(m.phone) && <Tag tone="erro">Remetente bloqueado</Tag>}
-              </Talao>
+              <div key={m.id} style={{ position: "relative" }}>
+                <Talao name={m.donor} meta={<span className="mono muted" style={{ fontSize: 12 }}>{i + 1}</span>}
+                  text={m.kind === "audio" ? `Mensagem de voz · 00:${String(m.seconds).padStart(2, "0")}` : m.text} value={m.kz}
+                  onMenu={readOnly ? undefined : () => setMenu(menu === m.id ? null : m.id)}>
+                  {m.tags.map((t) => <Tag key={t}>{t}</Tag>)}
+                  {blocked.includes(m.phone) && <Tag tone="erro">Remetente bloqueado</Tag>}
+                </Talao>
+                {menu === m.id && (
+                  <div className="dropdown" role="menu" style={{ top: 44, right: 16 }}>
+                    <button role="menuitem" onClick={() => nav(`/painel/historico?q=${encodeURIComponent(m.donor)}`)}>Ver no histórico</button>
+                    <button role="menuitem" className="danger" onClick={() => { setMenu(null); setTarget(m); }}>Bloquear remetente</button>
+                  </div>
+                )}
+              </div>
             ))}
 
             <span className="eyebrow" style={{ marginTop: 8 }}>Já tocaram</span>
@@ -76,18 +84,23 @@ export default function LiveQueue({ readOnly = false }: { readOnly?: boolean }) 
               </div>
             )}
             <div className="card pad-l stack" style={{ gap: 12 }}>
-              <div className="row between"><h2>Saída</h2><Tag tone="ok">Overlay</Tag></div>
-              <div className="row between" style={{ fontSize: 14 }}><span>Overlay · OBS</span><span className="mono muted" style={{ fontSize: 12 }}>PC · ligado há 1 h 42</span></div>
-              <div className="row between" style={{ fontSize: 14 }}><span>Player só-áudio</span><span className="mono muted" style={{ fontSize: 12 }}>não usado</span></div>
-              <p className="hint">Cada mensagem toca numa só saída. Com o overlay ligado, o Player não toca.</p>
+              <div className="row between"><h2>Player e widgets</h2>{!readOnly && <Link to="/painel/widgets">Widgets</Link>}</div>
+              <div className="lines" style={{ fontSize: 14, padding: 0 }}>
+                <div className="row between"><span className="muted">W1 Alerta · TikTok LIVE Studio</span><Tag tone="ok">Ligado</Tag></div>
+                <div className="row between"><span className="muted">Player · telemóvel</span><Tag tone="ok">Ligado</Tag></div>
+              </div>
               <Volume value={vol} onChange={setVol} />
-              <button className="btn block" onClick={() => toast.show("Alerta de teste enviado para o overlay")}>Enviar alerta de teste</button>
+              <button className="btn block" onClick={() => toast.show("Alerta de teste enviado")}>Enviar alerta de teste</button>
             </div>
             {!readOnly && (
               <div className="card pad-l">
-                <div className="row between"><h2>Filtro automático</h2><span className="kz" style={{ fontSize: 20 }}>4</span></div>
-                <p className="muted" style={{ marginTop: 10, lineHeight: 1.5, fontSize: 14 }}>Mensagens travadas antes do pagamento nesta live: 2 com links, 1 com número de telefone, 1 com palavra proibida.</p>
-                <Link to="/painel/filtros" style={{ display: "inline-block", marginTop: 12, fontSize: 14 }}>Editar palavras proibidas</Link>
+                <div className="row between"><h2>Assistentes</h2><Link className="btn sm" to="/painel/assistentes">Convidar</Link></div>
+                <div className="lines" style={{ marginTop: 6, fontSize: 14 }}>
+                  {assistants.map((a) => (
+                    <div key={a.name} className="row between"><span className="muted">{a.name} · {a.contact}</span><Tag tone={a.status === "ativo" ? "ok" : "pend"}>{a.status === "ativo" ? "A ver a fila" : "Convite enviado"}</Tag></div>
+                  ))}
+                </div>
+                <p className="hint">Acompanham a fila e controlam o som. Não veem a carteira.</p>
               </div>
             )}
           </div>
@@ -95,16 +108,19 @@ export default function LiveQueue({ readOnly = false }: { readOnly?: boolean }) 
       </div>
 
       {target && (
-        <Modal title="Bloquear remetente?" onClose={() => setTarget(null)}>
-          <p className="muted" style={{ lineHeight: 1.5 }}>
-            <b style={{ color: "var(--tinta)" }}>{target.donor}</b> · <span className="mono">{maskPhone(target.phone)}</span>
-          </p>
-          <p style={{ marginTop: 12, lineHeight: 1.5, fontSize: 14 }}>
-            As próximas mensagens deste número são barradas antes do pagamento. Esta mensagem já foi paga e vai tocar na mesma.
-          </p>
-          <div className="row" style={{ gap: 10, marginTop: 20 }}>
-            <button className="btn grow" onClick={() => setTarget(null)}>Cancelar</button>
-            <button className="btn dark grow" onClick={() => { setBlocked((b) => [...b, target.phone]); setTarget(null); toast.show("Remetente bloqueado"); }}>Bloquear</button>
+        <Modal title={`Bloquear ${target.donor}?`} onClose={() => setTarget(null)}>
+          <p className="muted" style={{ lineHeight: 1.5, fontSize: 14 }}>Este número deixa de conseguir enviar mensagens para o teu canal, em todas as plataformas.</p>
+          <div className="card stack mono" style={{ background: "var(--papel)", gap: 8, padding: 14, marginTop: 14, fontSize: 13 }}>
+            <div className="row between"><span className="muted">Telemóvel</span><span>{maskPhone(target.phone)}</span></div>
+            <div className="row between"><span className="muted">Enviado este mês</span><span>6 mensagens · {kz(7500)}</span></div>
+            <div className="row between" style={{ borderTop: "1px dashed var(--linha-forte)", paddingTop: 8 }}><span>Já paga, na fila</span><b>1 · {kz(target.kz)}</b></div>
+          </div>
+          <p className="hint" style={{ marginTop: 12 }}>A mensagem que já está na fila foi paga e vai tocar. O bloqueio aplica-se a partir de agora. Podes desbloquear em Preços e filtros.</p>
+          <div className="row" style={{ gap: 10, marginTop: 18 }}>
+            <button className="btn grow" style={{ height: 52 }} onClick={() => setTarget(null)}>Cancelar</button>
+            <button className="btn-route grow" style={{ background: "var(--erro)" }} onClick={() => { setBlocked((b) => [...b, target.phone]); setTarget(null); toast.show("Remetente bloqueado"); }}>
+              <span className="label">Bloquear</span><span className="dot" style={{ background: "rgba(255,255,255,.35)" }} />
+            </button>
           </div>
         </Modal>
       )}

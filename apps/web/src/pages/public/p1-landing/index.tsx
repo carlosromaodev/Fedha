@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
-import { Logo } from "../../../shared/ui";
+import { Logo, Wave } from "../../../shared/ui";
+import { CyclingTalao } from "../../../layouts";
 
 const SCENARIOS = [
   { t: "PC com OBS ou Streamlabs", d: "Cola o link do overlay como Browser Source. YouTube, Twitch, Kick, Facebook e TikTok com stream key." },
@@ -16,23 +17,42 @@ export default function Landing() {
         <div className="inner">
           <div className="row between">
             <Logo />
-            <div className="row" style={{ gap: 8 }}>
-              <Link className="btn ghost-light sm" to="/auth/entrar">Entrar</Link>
-              <Link className="btn sm" style={{ background: "var(--sinal)", borderColor: "var(--sinal)" }} to="/auth/registo">Criar conta</Link>
-            </div>
+            <nav className="row" style={{ gap: 26, fontSize: 14.5 }}>
+              <a className="hide-m" href="#como" style={{ color: "var(--branco)", textDecoration: "none" }}>Como funciona</a>
+              <a className="hide-m" href="#apps" style={{ color: "var(--branco)", textDecoration: "none" }}>Para streamers</a>
+              <a className="hide-m" href="#como" style={{ color: "var(--branco)", textDecoration: "none" }}>Preços</a>
+              <Link className="hide-m" to="/auth/entrar" style={{ color: "var(--branco)", textDecoration: "none", fontWeight: 600 }}>Entrar</Link>
+              <Link className="btn-route sinal sm" style={{ width: 150 }} to="/auth/registo"><span className="label">Criar conta</span><span className="dot" /></Link>
+            </nav>
           </div>
-          <h1>Dinheiro<br />que se ouve.</h1>
-          <p style={{ maxWidth: 520, marginTop: 24, fontSize: 18, fontWeight: 300, lineHeight: 1.55, color: "rgba(255,255,255,.88)" }}>
-            Os teus seguidores pagam em Kwanza e a mensagem aparece no ecrã e toca na tua live, seja qual for a app. Tu não aprovas nada: toca sozinha.
-          </p>
-          <div className="row" style={{ gap: 12, marginTop: 32, flexWrap: "wrap" }}>
-            <Link className="btn-route sinal" style={{ width: 240 }} to="/auth/registo"><span className="label">Começar agora</span><span className="dot" /></Link>
-            <Link className="btn ghost-light" to="/kiami">Ver uma página de exemplo</Link>
+          <div className="land-grid">
+            <div>
+              <p className="eyebrow" style={{ color: "var(--sinal)", marginTop: 56 }}>Para streamers de TikTok, YouTube e Instagram</p>
+              <h1 style={{ marginTop: 18 }}>Dinheiro<br />que se ouve.</h1>
+              <p style={{ maxWidth: 520, marginTop: 24, fontSize: 18, fontWeight: 300, lineHeight: 1.55, color: "rgba(255,255,255,.88)" }}>
+                Os teus seguidores pagam em Kwanza e a mensagem aparece no ecrã da live, lida em voz alta. Sem app nova: funciona com o programa que já usas.
+              </p>
+              <div className="row" style={{ gap: 12, marginTop: 32, flexWrap: "wrap" }}>
+                <Link className="btn-route sinal" style={{ width: 290 }} to="/auth/registo"><span className="label">Criar conta de streamer</span><span className="dot" /></Link>
+                <Link className="btn ghost-light" style={{ height: 52, padding: "0 44px" }} to="/auth/entrar">Entrar</Link>
+              </div>
+              <div className="chips" style={{ marginTop: 22 }}>
+                {["TikTok", "YouTube", "Instagram", "Kick", "Twitch", "Facebook"].map((p) => <span key={p} className="chip word" style={{ background: "transparent", border: "1px solid rgba(255,255,255,.35)", color: "var(--branco)" }}>{p}</span>)}
+              </div>
+            </div>
+            <div className="land-card hide-m">
+              <div className="row" style={{ gap: 14 }}>
+                <span className="land-sym" aria-hidden />
+                <div><small style={{ color: "rgba(255,255,255,.75)" }}>A tocar agora</small><br /><b>Kiami Gamer · TikTok LIVE</b></div>
+              </div>
+              <div style={{ color: "var(--tinta)" }}><CyclingTalao /></div>
+              <div className="row" style={{ gap: 12, fontSize: 13 }}><Wave n={9} /> 38 lives a receber mensagens agora</div>
+            </div>
           </div>
         </div>
       </section>
 
-      <section className="land-sec">
+      <section className="land-sec" id="como">
         <span className="eyebrow">Como funciona</span>
         <div className="land-steps" style={{ marginTop: 16 }}>
           {[
@@ -47,7 +67,7 @@ export default function Landing() {
         </div>
       </section>
 
-      <section className="land-sec" style={{ paddingTop: 0 }}>
+      <section className="land-sec" id="apps" style={{ paddingTop: 0 }}>
         <span className="eyebrow">Um só link, qualquer app</span>
         <div className="grid g2" style={{ marginTop: 16 }}>
           {SCENARIOS.map((s) => (

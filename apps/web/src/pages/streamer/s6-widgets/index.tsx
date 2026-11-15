@@ -1,41 +1,71 @@
 import { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import { Topbar } from "../../../layouts";
-import { Tag, copy, useToast } from "../../../shared/ui";
-import { PLATFORM_LABEL, streamer } from "../../../shared/mocks/data";
+import { RouteButton, Tag, copy, useToast } from "../../../shared/ui";
+import { PLATFORM_LABEL, streamer, type Platform } from "../../../shared/mocks/data";
+import { cx } from "../../../shared/lib/format";
+import { WidgetPreview } from "../../../features/overlay-setup/Previews";
+import { NO_QR, WIDGETS, widgetUrl, type Conn } from "../../../features/overlay-setup/widgets";
 
-/**
- * S6 — Overlay e alertas. Versão mínima: link do overlay, revogar e alerta de teste.
- * O painel completo (seletor "Onde fazes live?", aparência, W1–W6 e guias G1–G7) vem do prompt de widgets
- * e será gerado no Claude Design antes de ser construído aqui.
- */
+const CONN: Record<Conn, { label: string; tone?: "ok" | "pend" | "erro" }> = {
+  aberto: { label: "Aberto", tone: "ok" },
+  fechado: { label: "Fechado" },
+  a_religar: { label: "A religar", tone: "pend" },
+  desligado: { label: "Desligado" },
+};
+
+/** S6 — Widgets (11): cada widget é um link que se cola no programa de transmissão. */
 export default function Widgets() {
-  const [token, setToken] = useState("8F3A2C71E6");
+  const nav = useNavigate();
   const toast = useToast();
-  const url = `https://fedha.live/o/${token}`;
-  const qrBlocked = streamer.platform === "tiktok" || streamer.platform === "instagram";
+  const [dest, setDest] = useState<Platform>(streamer.platform);
+  const qrOff = NO_QR.includes(dest);
 
   return (
     <>
-      <Topbar title="Overlay e alertas" />
-      <div className="page" style={{ maxWidth: 860 }}>
-        <div className="card pad-l stack" style={{ gap: 12 }}>
-          <div className="row between"><h2>O teu link de overlay</h2><Tag tone="ok">Ligado · OBS</Tag></div>
-          <p className="muted" style={{ fontSize: 14 }}>Um só link mostra a mensagem no ecrã e toca o áudio. Cola-o como Browser Source (OBS, Streamlabs), Link Source (TikTok LIVE Studio) ou widget Web (PRISM, CameraFi Live).</p>
-          <div className="row" style={{ gap: 8, flexWrap: "wrap" }}>
-            <span className="linkbox grow" style={{ minWidth: 220 }}><span className="grow">fedha.live/o/{token.slice(0, 4)}••••••</span></span>
-            <button className="btn dark" onClick={() => { copy(url); toast.show("Link copiado"); }}>Copiar</button>
-            <button className="btn" onClick={() => toast.show("Alerta de teste enviado")}>Alerta de teste</button>
-            <button className="btn" onClick={() => { setToken(Math.random().toString(16).slice(2, 12).toUpperCase()); toast.show("Link antigo revogado"); }}>Regenerar</button>
+      <Topbar title="Widgets" sub="Cada widget é um link que colas no programa de transmissão">
+        <Link to="/painel/widgets/ajuda" className="btn hide-m">Resolver problemas</Link>
+        <div style={{ width: 230 }}><RouteButton size="sm" onClick={() => toast.show("Alerta de teste enviado para o W1")}>Enviar alerta de teste</RouteButton></div>
+      </Topbar>
+      <div className="page">
+        <div className="row between" style={{ gap: 16, flexWrap: "wrap" }}>
+          <div className="dest" role="radiogroup" aria-label="Destino da live">
+            <span className="eyebrow">Destino da live</span>
+            {(Object.keys(PLATFORM_LABEL) as Platform[]).map((p) => (
+              <button key={p} role="radio" aria-checked={dest === p} className={cx("chip", dest === p && "on")} onClick={() => setDest(p)}>{PLATFORM_LABEL[p]}</button>
+            ))}
           </div>
-          <p className="hint">Não mostres este link na live. Quem o tiver vê os teus alertas. Se o partilhares sem querer, regenera-o.</p>
+          <p className="muted" style={{ fontSize: 13, textAlign: "right", maxWidth: 340 }}>A posição e o tamanho definem-se no programa: arrasta a camada no OBS, LIVE Studio ou CameraFi.</p>
         </div>
-        <div className="card pad-l stack" style={{ gap: 8 }}>
-          <div className="row between"><h2>QR code na live (W5)</h2><Tag tone={qrBlocked ? "erro" : "ok"}>{qrBlocked ? "Desligado" : "Disponível"}</Tag></div>
-          <p className="muted" style={{ fontSize: 14 }}>
-            {qrBlocked ? `O ${PLATFORM_LABEL[streamer.platform]} não permite QR codes nem links no ecrã. Põe fedha.live/${streamer.handle} só na bio.` : "Podes mostrar um QR para a tua página na live."}
-          </p>
+
+        <div className="aviso row between" style={{ alignItems: "center" }}>
+          <span>O W1 está aberto em 2 sítios; só o último toca.{qrOff && ` · Escolheste ${PLATFORM_LABEL[dest]}: o W5 foi desligado.`}</span>
+          <Link to="/painel/widgets/ajuda" style={{ whiteSpace: "nowrap" }}>Ver onde</Link>
         </div>
-        <div className="aviso info">O painel completo (aparência do alerta, widgets de meta, ranking e combinado, e os guias por app) está a ser desenhado e chega na próxima versão.</div>
+
+        <div className="wg-grid">
+          {WIDGETS.map((w) => {
+            const off = w.id === "w5" && qrOff;
+            const st = off ? { label: `Desligado · ${PLATFORM_LABEL[dest]}` } : CONN[w.conn];
+            return (
+              <div key={w.id} className={cx("card wg", off && "off")}>
+                <div className="hd">
+                  <span className="id">W{w.n}</span><b>{w.name}</b>
+                  <Tag tone={st.tone}>{st.label}{!off && w.where ? ` · ${w.where}` : ""}</Tag>
+                </div>
+                <WidgetPreview id={w.id} disabled={off} />
+                <div className="row between">
+                  <button className="btn dark sm" disabled={off} onClick={() => { copy(widgetUrl(w, { dest })); toast.show(`Link do W${w.n} copiado. Não o mostres na live.`); }}>Copiar link</button>
+                  <div className="row" style={{ gap: 6 }}>
+                    <a className="btn sm hide-m" href={widgetUrl(w, { dest, preview: true })} target="_blank" rel="noreferrer" aria-disabled={off} style={off ? { pointerEvents: "none", opacity: .45 } : undefined}>Abrir</a>
+                    <button className="btn sm" disabled={off} onClick={() => nav(`/painel/widgets/${w.id}`)}>Personalizar</button>
+                  </div>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+        {qrOff && <p className="hint">O {PLATFORM_LABEL[dest]} não permite QR codes nem links no ecrã. Põe fedha.live/{streamer.handle} só na bio.</p>}
       </div>
       {toast.node}
     </>

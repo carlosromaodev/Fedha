@@ -31,7 +31,7 @@ export default function Confirmation() {
   ];
 
   return (
-    <div className="pub verde">
+    <div className="pub verde cf">
       <main className="pub-main" style={{ gap: 18 }}>
         <span className="tag" style={{ alignSelf: "flex-start", background: "var(--verde-claro)", color: "var(--verde)" }}>Pagamento confirmado</span>
         <div style={{ marginTop: 32 }}>

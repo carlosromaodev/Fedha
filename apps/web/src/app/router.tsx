@@ -1,5 +1,5 @@
 import { lazy, Suspense, type ReactNode } from "react";
-import { createBrowserRouter, Outlet } from "react-router-dom";
+import { createBrowserRouter, Navigate, Outlet } from "react-router-dom";
 import { AdminLayout, AuthLayout, StreamerLayout } from "../layouts";
 import { DraftProvider } from "../features/composer/store";
 
@@ -20,13 +20,14 @@ export const router = createBrowserRouter([
     path: "/auth",
     element: <AuthLayout />,
     children: [
-      { path: "registo", element: <Lazy>{L(() => import("../pages/auth/a1-register"))}</Lazy> },
-      { path: "verificar", element: <Lazy>{L(() => import("../pages/auth/a2-verify"))}</Lazy> },
       { path: "entrar", element: <Lazy>{L(() => import("../pages/auth/a3-login"))}</Lazy> },
       { path: "recuperar", element: <Lazy>{L(() => import("../pages/auth/a4-recover-password"))}</Lazy> },
       { path: "2fa", element: <Lazy>{L(() => import("../pages/auth/a5-two-factor"))}</Lazy> },
     ],
   },
+  { path: "/auth/registo", element: <Lazy>{L(() => import("../pages/auth/a1-register"))}</Lazy> },
+  { path: "/auth/verificar", element: <Lazy>{L(() => import("../pages/auth/a2-verify"))}</Lazy> },
+  { path: "/auth/link", element: <Lazy>{L(() => import("../pages/auth/a2-verify/Link"))}</Lazy> },
   { path: "/boas-vindas", element: <Lazy>{L(() => import("../pages/auth/a6-onboarding"))}</Lazy> },
   { path: "/verificacao", element: <Lazy>{L(() => import("../pages/auth/a7-kyc"))}</Lazy> },
 
@@ -36,21 +37,25 @@ export const router = createBrowserRouter([
     children: [
       { index: true, element: <Lazy>{L(() => import("../pages/streamer/s1-dashboard"))}</Lazy> },
       { path: "fila", element: <Lazy>{L(() => import("../pages/streamer/s2-live-queue"))}</Lazy> },
-      { path: "overlay", element: <Lazy>{L(() => import("../pages/streamer/s6-widgets"))}</Lazy> },
+      { path: "player", element: <Lazy>{L(() => import("../pages/streamer/s3-player"))}</Lazy> },
+      { path: "widgets", element: <Lazy>{L(() => import("../pages/streamer/s6-widgets"))}</Lazy> },
+      { path: "widgets/ajuda", element: <Lazy>{L(() => import("../pages/streamer/s6-widgets/Troubleshoot"))}</Lazy> },
+      { path: "widgets/:id", element: <Lazy>{L(() => import("../pages/streamer/s6-widgets/Customize"))}</Lazy> },
+      { path: "overlay", element: <Navigate to="/painel/widgets" replace /> },
       { path: "historico", element: <Lazy>{L(() => import("../pages/streamer/s4-history"))}</Lazy> },
       { path: "carteira", element: <Lazy>{L(() => import("../pages/streamer/s11-withdrawals"))}</Lazy> },
       { path: "metas", element: <Lazy>{L(() => import("../pages/streamer/s7-goals"))}</Lazy> },
       { path: "pagina", element: <Lazy>{L(() => import("../pages/streamer/s8-public-page"))}</Lazy> },
       { path: "precos", element: <Lazy>{L(() => import("../pages/streamer/s5-pricing"))}</Lazy> },
-      { path: "filtros", element: <Lazy>{L(() => import("../pages/streamer/s9-filters"))}</Lazy> },
+      { path: "filtros", element: <Navigate to="/painel/precos" replace /> },
       { path: "assistentes", element: <Lazy>{L(() => import("../pages/streamer/s10-assistants"))}</Lazy> },
       { path: "notificacoes", element: <Lazy>{L(() => import("../pages/streamer/s13-notifications"))}</Lazy> },
       { path: "conta", element: <Lazy>{L(() => import("../pages/streamer/s14-settings"))}</Lazy> },
       { path: "ajuda", element: <Lazy>{L(() => import("../pages/streamer/s15-support"))}</Lazy> },
     ],
   },
-  // Player só-áudio: ecrã inteiro, pensado para o telemóvel ligado à coluna.
-  { path: "/painel/player", element: <Lazy>{L(() => import("../pages/streamer/s3-player"))}</Lazy> },
+  // Player em ecrã inteiro, pensado para o telemóvel ligado à coluna.
+  { path: "/player", element: <Lazy>{L(() => import("../pages/streamer/s3-player/Mobile"))}</Lazy> },
 
   { path: "/assistente", element: <Lazy>{L(() => import("../pages/assistant/as2-live-queue"))}</Lazy> },
   { path: "/assistente/convite/:token", element: <Lazy>{L(() => import("../pages/assistant/as1-streamer-select"))}</Lazy> },
@@ -62,6 +67,7 @@ export const router = createBrowserRouter([
     children: [
       { index: true, element: <Lazy>{L(() => import("../pages/admin/b1-overview"))}</Lazy> },
       { path: "transacoes", element: <Lazy>{L(() => import("../pages/admin/b4-transactions"))}</Lazy> },
+      { path: "reembolsos", element: <Lazy>{L(() => import("../pages/admin/b4-transactions/Failures"))}</Lazy> },
       { path: "falhas", element: <Lazy>{L(() => import("../pages/admin/b4-transactions/Failures"))}</Lazy> },
       { path: "levantamentos", element: <Lazy>{L(() => import("../pages/admin/b6-withdrawals"))}</Lazy> },
       { path: "streamers", element: <Lazy>{L(() => import("../pages/admin/b2-streamers"))}</Lazy> },

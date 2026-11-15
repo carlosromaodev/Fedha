@@ -1,7 +1,7 @@
 import { Link } from "react-router-dom";
 import { Topbar } from "../../../layouts";
-import { LiveBadge, Stat, Talao, Tag } from "../../../shared/ui";
-import { PLATFORM_LABEL, goal, last14, queue, streamer, wallet } from "../../../shared/mocks/data";
+import { Stat, Talao, Tag } from "../../../shared/ui";
+import { goal, last14, queue, streamer, wallet } from "../../../shared/mocks/data";
 import { kz } from "../../../shared/lib/format";
 import { LinkBox } from "../../../features/queue/LinkBox";
 
@@ -12,9 +12,9 @@ export default function Dashboard() {
   const recent = queue.filter((q) => q.status !== "na_fila").concat(queue.filter((q) => q.status === "na_fila")).slice(0, 4);
   return (
     <>
-      <Topbar title="Dashboard">
-        {streamer.live && <span className="hide-m"><LiveBadge>Ao vivo · {PLATFORM_LABEL[streamer.platform]}</LiveBadge></span>}
+      <Topbar title={`Olá, ${streamer.name.split(" ")[0]}`} sub={`${new Date().toLocaleDateString("pt-PT", { weekday: "long", day: "2-digit", month: "2-digit", year: "numeric" })} · hora de Luanda`}>
         <LinkBox />
+        <Link className="btn hide-m" to="/painel/player">Abrir Player</Link>
       </Topbar>
       <div className="page">
         <div className="grid g4">
@@ -31,12 +31,12 @@ export default function Dashboard() {
 
         <div className="split" style={{ gridTemplateColumns: "minmax(0,1.5fr) minmax(0,1fr)" }}>
           <div className="card pad-l">
-            <div className="row between"><h2>Últimos 14 dias</h2><span className="mono muted" style={{ fontSize: 12 }}>Total {kz(642300)}</span></div>
+            <div className="row between"><h2>Recebido nos últimos 14 dias</h2><span className="mono muted" style={{ fontSize: 12 }}>Total {kz(642300)}</span></div>
             <div className="bars14" style={{ marginTop: 20 }} role="img" aria-label="Receitas por dia nos últimos 14 dias">
               {last14.map((d, i) => (
                 <div key={i} className={i === 13 ? "today" : ""}>
                   <div className="trio">{d.map((v, k) => <i key={k} style={{ height: `${Math.max(2, (v / max) * 100)}%` }} />)}</div>
-                  <small>{String(i + 1).padStart(2, "0")}</small>
+                  <small>{String(i + 1).padStart(2, "0")}/11</small>
                 </div>
               ))}
             </div>
@@ -51,11 +51,11 @@ export default function Dashboard() {
               <div className="row between mono" style={{ marginTop: 10, fontSize: 13 }}><span>{kz(goal.current, false)} / {kz(goal.target)}</span><span className="muted">{pct}%</span></div>
             </div>
             <div className="card pad-l">
-              <h2>Estado</h2>
+              <div className="row between"><h2>Saídas para a live</h2><Link to="/painel/widgets">Widgets</Link></div>
               <div className="lines" style={{ marginTop: 8, fontSize: 14 }}>
-                <div className="row between"><span>Overlay · OBS</span><Tag tone="ok">Ligado</Tag></div>
-                <div className="row between"><span>Player só-áudio</span><Tag>Desligado</Tag></div>
-                <div className="row between"><span>Filtro automático</span><span className="mono muted" style={{ fontSize: 12 }}>4 bloqueadas hoje</span></div>
+                <div className="row between"><span>W1 Alerta · TikTok LIVE Studio</span><Tag tone="ok">Ligado</Tag></div>
+                <div className="row between"><span>Player · telemóvel</span><Tag tone="ok">Ligado</Tag></div>
+                <div className="row between"><span>W2 Meta</span><Tag tone="pend">A religar</Tag></div>
               </div>
             </div>
           </div>

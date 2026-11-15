@@ -57,20 +57,22 @@ export default function StreamerPage() {
     <div className="pub sp-wrap">
       <header className="sp-head">
         <Logo />
-        <span className="eyebrow">fedha.live/{streamer.handle}</span>
+        <nav className="row" style={{ gap: 18, fontSize: 14 }}>
+          <a href="/#como" className="hide-m" style={{ color: "var(--branco)", textDecoration: "none" }}>Como funciona</a>
+          <a href="/auth/registo" className="btn ghost-light sm">Sou streamer</a>
+        </nav>
       </header>
       <div className="sp-grid">
         <section className="sp-profile">
-          <div className="row" style={{ gap: 8 }}>
-            <Tag>{PLATFORM_LABEL[streamer.platform]} live</Tag>
-            {streamer.live ? <LiveBadge /> : <Tag>Offline</Tag>}
-            <span className="mono muted" style={{ marginLeft: "auto", fontSize: 12 }}>{streamer.viewers}</span>
-          </div>
-          <div className="row" style={{ gap: 14, marginTop: 16 }}>
-            <span className="avatar l">KG</span>
+          <div className="row" style={{ gap: 14 }}>
+            <span className="avatar l sp-av">KG</span>
             <div>
-              <h1 style={{ fontSize: 24 }}>{streamer.name}</h1>
-              <span className="mono muted" style={{ fontSize: 13 }}>@{streamer.handle}gamer</span>
+              <h1 className="sp-name">{streamer.name}</h1>
+              <div className="row" style={{ gap: 8, marginTop: 6, flexWrap: "wrap" }}>
+                <Tag>{PLATFORM_LABEL[streamer.platform]} live</Tag>
+                {streamer.live ? <LiveBadge /> : <Tag>Offline</Tag>}
+                <span className="mono muted" style={{ fontSize: 12 }}>{streamer.viewers} · 01:42:10</span>
+              </div>
             </div>
           </div>
           <p className="muted light sp-bio" style={{ marginTop: 12, fontSize: 14, lineHeight: 1.5 }}>{streamer.bio}</p>
@@ -84,8 +86,19 @@ export default function StreamerPage() {
             <p style={{ marginTop: 8, fontSize: 16, lineHeight: 1.4 }}>"{playing.text}"</p>
             <div className="progress" style={{ marginTop: 14 }}><i style={{ width: "24%" }} /></div>
             <p style={{ marginTop: 12, paddingTop: 12, borderTop: "1px solid rgba(255,255,255,.15)", fontSize: 13 }}>
-              {waiting} na fila · a tua toca em ~{Math.max(1, Math.round(waiting * 0.4))} min
+              {waiting} na fila · a tua toca em cerca de {Math.max(1, Math.round(waiting * 0.4))} min
             </p>
+          </div>
+          <div className="sp-next">
+            <span className="eyebrow">A seguir na live</span>
+            {queue.filter((q) => q.status === "na_fila").slice(0, 3).map((m, i) => (
+              <div key={m.id} className="row" style={{ gap: 12, padding: "14px 16px", fontSize: 14 }}>
+                <span className="mono muted" style={{ fontSize: 12 }}>{i + 1}</span>
+                <b style={{ fontWeight: 600 }}>{m.donor}</b>
+                {m.tags[0] && <Tag>{m.tags[0].split(" ")[0]}</Tag>}
+                <span className="muted" style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{m.kind === "audio" ? `Mensagem de voz · 00:${m.seconds}` : m.text}</span>
+              </div>
+            ))}
           </div>
         </section>
 
@@ -121,43 +134,40 @@ export default function StreamerPage() {
                 </div>
               </div>
 
-              <details className="card sp-extras" style={{ padding: 16 }}>
-                <summary className="row between" style={{ cursor: "pointer", listStyle: "none" }}>
-                  <b style={{ fontSize: 14 }}>Voz, efeito e prioridade</b>
-                  <span className="mono muted" style={{ fontSize: 12 }}>opcional</span>
-                </summary>
-                <div className="stack" style={{ gap: 14, marginTop: 14 }}>
-                  <div>
-                    <div className="eyebrow" style={{ marginBottom: 8 }}>Voz</div>
-                    <div className="chips">
-                      {voices.map((v) => (
-                        <button key={v.id} className={cx("chip", voice === v.id && "on")} onClick={() => setVoice(v.id)}>
-                          {v.name}{v.premium ? ` · +${kz(pricing.extras.premiumVoice)}` : ""}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                  <div>
-                    <div className="eyebrow" style={{ marginBottom: 8 }}>Efeito antes da mensagem · +{kz(pricing.extras.effect)}</div>
-                    <div className="chips">
-                      <button className={cx("chip", !effect && "on")} onClick={() => setEffect(null)}>Nenhum</button>
-                      {effects.map((e) => (
-                        <button key={e.id} className={cx("chip", effect === e.id && "on")} onClick={() => setEffect(e.id)}>{e.name}</button>
-                      ))}
-                    </div>
-                  </div>
-                  <label className="row between" style={{ gap: 12 }}>
-                    <span><b style={{ fontSize: 14 }}>Prioridade na fila</b><br /><small className="muted">Passa à frente das mensagens sem prioridade · +{kz(pricing.extras.priority)}</small></span>
-                    <input type="checkbox" className="selo" checked={priority} onChange={(e) => setPriority(e.target.checked)} />
-                  </label>
-                </div>
-              </details>
-
               <button className="sp-listen" onClick={() => speak(text || "Escreve a mensagem para ouvires como vai soar.")}>
                 <span className="play" aria-hidden>▶</span>
                 <span className="grow" style={{ textAlign: "left" }}>Ouvir como vai soar</span>
                 <Wave n={14} tone="verde" still />
               </button>
+
+              <div className="card sp-extras">
+                <label className="sp-x">
+                  <input type="checkbox" className="selo" checked={premium} onChange={(e) => setVoice(e.target.checked ? "ngola" : "nzinga")} />
+                  <span className="grow"><b>Voz premium</b><small>Voz mais natural</small></span>
+                  <span className="kz">+{kz(pricing.extras.premiumVoice)}</span>
+                </label>
+                <label className="sp-x">
+                  <input type="checkbox" className="selo" checked={!!effect} onChange={(e) => setEffect(e.target.checked ? effects[0]!.id : null)} />
+                  <span className="grow"><b>Efeito sonoro</b><small>Toca antes da mensagem</small></span>
+                  <span className="kz">+{kz(pricing.extras.effect)}</span>
+                </label>
+                {effect && (
+                  <div className="sp-fx" role="radiogroup" aria-label="Efeito">
+                    {effects.slice(0, 2).map((fx) => (
+                      <label key={fx.id} className="row" style={{ gap: 10 }}>
+                        <input type="radio" name="fx" className="selo round" checked={effect === fx.id} onChange={() => setEffect(fx.id)} />
+                        <span className="grow">{fx.name} <small className="muted">1 s</small></span>
+                        <button type="button" className="row link" style={{ gap: 6, textDecoration: "none", color: "var(--tinta)" }} onClick={() => speak(fx.name)}><span className="play-mini" style={{ width: 22, height: 22, fontSize: 8, background: "var(--tinta)" }}>▶</span>Ouvir exemplo</button>
+                      </label>
+                    ))}
+                  </div>
+                )}
+                <label className="sp-x">
+                  <input type="checkbox" className="selo" checked={priority} onChange={(e) => setPriority(e.target.checked)} />
+                  <span className="grow"><b>Prioridade</b><small>Passa à frente na fila</small></span>
+                  <span className="kz">+{kz(pricing.extras.priority)}</span>
+                </label>
+              </div>
             </>
           ) : (
             <AudioComposer rec={audio} tier={audioTier} setTier={setAudioTier} />

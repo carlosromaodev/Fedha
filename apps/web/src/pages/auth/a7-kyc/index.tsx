@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Field, Logo, RouteButton } from "../../../shared/ui";
+import { Field, RouteButton } from "../../../shared/ui";
+import { StepsLayout } from "../../../layouts";
 import { cx } from "../../../shared/lib/format";
 
 type Doc = { key: string; title: string; sub: string; progress: number | null; size?: string };
@@ -47,12 +48,8 @@ export default function Kyc() {
   }
 
   return (
-    <div className="pub">
-      <header className="sp-head"><Logo /></header>
-      <main className="pub-main">
-        <div className="steps"><i className="on" /><i className={allDocs ? "on" : ""} /><i className={allDocs && nifOk && ibanOk ? "on" : ""} /></div>
-        <h1>Verifica a tua identidade</h1>
-        <p className="muted">Obrigatório para levantar dinheiro. Os documentos só são vistos pela equipa de Compliance.</p>
+    <StepsLayout step={4} title="Verifica a tua identidade" text="Obrigatório para levantar dinheiro. Só a equipa de Compliance vê os documentos.">
+        <h1>Documentos</h1>
         <div className="seg">
           <button className={kind === "bi" ? "on" : ""} onClick={() => setKind("bi")}>BI</button>
           <button className={kind === "passaporte" ? "on" : ""} onClick={() => setKind("passaporte")}>Passaporte</button>
@@ -80,15 +77,13 @@ export default function Kyc() {
         <Field label="NIF" error={nif && !nifOk ? "O NIF tem 14 caracteres (ex.: 004812337LA041)." : null} ok={nifOk}>
           <input className="mono-in" value={nif} maxLength={14} onChange={(e) => setNif(e.target.value.toUpperCase())} />
         </Field>
-        <Field label="IBAN" error={iban && !ibanOk ? "IBAN angolano: AO06 seguido de 21 dígitos." : null} ok={ibanOk} hint="A conta tem de estar em teu nome.">
+        <Field label="IBAN (opcional)" error={iban && !ibanOk ? "IBAN angolano: AO06 seguido de 21 dígitos." : null} ok={ibanOk} hint="Em teu nome. Podes adicionar depois na Carteira.">
           <input className="mono-in" value={iban} onChange={(e) => setIban(e.target.value.toUpperCase())} placeholder="AO06 …" />
         </Field>
-      </main>
-      <footer className="pub-foot">
-        <RouteButton disabled={!(allDocs || (kind === "passaporte" && docs.filter((d) => d.key !== "verso").every((d) => d.progress === 100))) || !nifOk || !ibanOk} onClick={() => setSent(true)}>
+        <RouteButton disabled={!(allDocs || (kind === "passaporte" && docs.filter((d) => d.key !== "verso").every((d) => d.progress === 100))) || !nifOk || (!!iban && !ibanOk)} onClick={() => setSent(true)}>
           Enviar para análise
         </RouteButton>
-      </footer>
-    </div>
+        <button className="link" style={{ alignSelf: "center", fontSize: 14 }} onClick={() => nav("/painel")}>Fazer depois</button>
+    </StepsLayout>
   );
 }

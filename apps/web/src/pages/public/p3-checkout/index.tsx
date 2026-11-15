@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { Field, RouteButton, Tag } from "../../../shared/ui";
+import { Field, LiveBadge, Logo, RouteButton, Tag } from "../../../shared/ui";
 import { streamer } from "../../../shared/mocks/data";
 import { kz, phone } from "../../../shared/lib/format";
 import { useDraft, type PayMethod } from "../../../features/composer/store";
@@ -34,8 +34,17 @@ export default function Checkout() {
   };
 
   return (
-    <div className="pub">
-      <main className="pub-main">
+    <div className="pub ck">
+      <header className="ck-head">
+        <Logo />
+        <span className="row" style={{ gap: 10, fontSize: 14 }}>
+          <span className="avatar" style={{ width: 28, height: 28, background: "var(--verde)", color: "var(--branco)", fontSize: 10 }}>KG</span>
+          <span className="hide-m">A enviar para <b>{streamer.name}</b></span>
+          <LiveBadge />
+        </span>
+      </header>
+      <main className="pub-main ck-main">
+        <div className="ck-left stack" style={{ gap: 14 }}>
         <div className="pub-top">
           <Link to={`/${streamer.handle}`} className="link" style={{ textDecoration: "none" }}>← Editar</Link>
           <span className="eyebrow">Passo 2 de 3</span>
@@ -62,7 +71,11 @@ export default function Checkout() {
               <span className="muted">{l.label}</span><span>{kz(l.kz)}</span>
             </div>
           ))}
+          <div className="row between mono" style={{ fontSize: 14, borderTop: "1px dashed var(--linha-forte)", paddingTop: 8 }}><span>Total</span><span>{kz(draft.total)}</span></div>
         </div>
+        </div>
+        <div className="ck-right stack" style={{ gap: 12 }}>
+        <span className="eyebrow">Método de pagamento</span>
 
         <div role="radiogroup" aria-label="Método de pagamento" className="stack" style={{ gap: 10 }}>
           <div className={method === "mcx" ? "opcao on" : "opcao"} role="radio" aria-checked={method === "mcx"} tabIndex={0}
@@ -87,9 +100,7 @@ export default function Checkout() {
             <span className="grow">Unitel Money · Afrimoney · Cartão</span><Tag>Em breve</Tag>
           </div>
         </div>
-      </main>
-
-      <footer className="pub-foot">
+      <div className="pub-foot ck-pay">
         <label className="row" style={{ gap: 12, alignItems: "flex-start", fontSize: 13.5, lineHeight: 1.45 }}>
           <input type="checkbox" className="selo" checked={accepted} onChange={(e) => setAccepted(e.target.checked)} />
           <span>
@@ -99,7 +110,9 @@ export default function Checkout() {
         </label>
         {touched && !accepted && <p className="hint erro" role="alert">Tens de aceitar para continuar.</p>}
         <RouteButton value={draft.total} disabled={!accepted} onClick={pay}>Pagar</RouteButton>
-      </footer>
+      </div>
+        </div>
+      </main>
     </div>
   );
 }
