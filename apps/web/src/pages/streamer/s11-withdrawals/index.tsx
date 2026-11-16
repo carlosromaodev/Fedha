@@ -78,7 +78,7 @@ export default function Wallet() {
             <span className="eyebrow">Código enviado por SMS para +244 923 ••• 207</span>
             <CodeInput onComplete={setCode} />
             <div className="row" style={{ gap: 10 }}>
-              <button className="btn" style={{ height: 52, flex: "0 0 40%" }} onClick={() => setOpen(false)}>Cancelar</button>
+              <button className="btn" style={{ height: 52, flex: "none" }} onClick={() => setOpen(false)}>Cancelar</button>
               <RouteButton value={amount} disabled={!!err || code.length < 6} onClick={() => { setOpen(false); toast.show("Levantamento pedido. Recebes uma notificação quando for pago."); }}>Levantar</RouteButton>
             </div>
           </div>

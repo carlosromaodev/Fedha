@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Topbar } from "../../../layouts";
-import { Modal, Stat, Talao, Tag, Volume, Wave, useToast } from "../../../shared/ui";
+import { Modal, Stat, Talao, Tag, Volume, Wave, useToast, Send, UserPlus } from "../../../shared/ui";
 import { assistants, queue as initial, streamer, type QueueMsg } from "../../../shared/mocks/data";
 import { kz, maskPhone } from "../../../shared/lib/format";
 import { LinkBox } from "../../../features/queue/LinkBox";
@@ -95,11 +95,11 @@ export default function LiveQueue({ readOnly = false }: { readOnly?: boolean }) 
                 <div className="row between"><span className="muted">Player · telemóvel</span><Tag tone="ok">Ligado</Tag></div>
               </div>
               <Volume value={vol} onChange={setVol} />
-              <button className="btn block" onClick={() => toast.show("Alerta de teste enviado")}>Enviar alerta de teste</button>
+              <button className="btn block" onClick={() => toast.show("Alerta de teste enviado")}><Send aria-hidden />Enviar alerta de teste</button>
             </div>
             {!readOnly && (
               <div className="card pad-l">
-                <div className="row between"><h2>Assistentes</h2><Link className="btn sm" to="/painel/assistentes">Convidar</Link></div>
+                <div className="row between"><h2>Assistentes</h2><Link className="btn sm" to="/painel/assistentes"><UserPlus aria-hidden />Convidar</Link></div>
                 <div className="lines" style={{ marginTop: 6, fontSize: 14 }}>
                   {assistants.map((a) => (
                     <div key={a.name} className="row between"><span className="muted">{a.name} · {a.contact}</span><Tag tone={a.status === "ativo" ? "ok" : "pend"}>{a.status === "ativo" ? "A ver a fila" : "Convite enviado"}</Tag></div>

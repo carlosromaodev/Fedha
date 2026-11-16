@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Topbar } from "../../../layouts";
-import { Field, RouteButton, useToast } from "../../../shared/ui";
+import { Field, RouteButton, useToast, RotateCcw } from "../../../shared/ui";
 import { blockedSenders, blockedWords, pricing } from "../../../shared/mocks/data";
 import { kz, maskPhone } from "../../../shared/lib/format";
 
@@ -56,7 +56,7 @@ export default function PricingAndFilters() {
   return (
     <>
       <Topbar title="Preços e filtros" sub={`A plataforma retém ${pricing.platformFeePct}% de cada mensagem`}>
-        <button className="btn" onClick={() => setRows(DEFAULT)}>Repor padrão</button>
+        <button className="btn" onClick={() => setRows(DEFAULT)}><RotateCcw aria-hidden />Repor padrão</button>
         <div style={{ width: 140 }}><RouteButton size="sm" disabled={!dirty || !ok} onClick={() => { setSaved(rows); toast.show("Preços guardados. A tua página já mostra os novos valores."); }}>Guardar</RouteButton></div>
       </Topbar>
       <div className="page">

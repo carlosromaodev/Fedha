@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
-import { RouteButton, Volume, useToast } from "../../shared/ui";
+import { RouteButton, Volume, useToast, RotateCcw, Volume2, ChevronLeft } from "../../shared/ui";
 import { queue } from "../../shared/mocks/data";
 import { kz } from "../../shared/lib/format";
 
@@ -52,7 +52,7 @@ export function Player({ backTo, title = "Player" }: { backTo: string; title?: s
   return (
     <div className="player">
       <div className="row between">
-        <Link to={backTo} style={{ color: "var(--branco)", textDecoration: "none", fontWeight: 600, fontSize: 18 }}>← {title}</Link>
+        <Link to={backTo} style={{ color: "var(--branco)", textDecoration: "none", fontWeight: 600, fontSize: 18, display: "inline-flex", alignItems: "center", gap: 4 }}><ChevronLeft size={22} aria-hidden />{title}</Link>
         <span className={enabled ? "tag ok" : "tag pend"}>{enabled ? "Ligado" : "Som desativado"}</span>
       </div>
 
@@ -63,7 +63,7 @@ export function Player({ backTo, title = "Player" }: { backTo: string; title?: s
             <p style={{ fontWeight: 300, lineHeight: 1.5, color: "rgba(255,255,255,.85)" }}>O navegador só reproduz áudio depois de tocares no ecrã. {items.length} mensagens pagas estão à espera.</p>
           </div>
           <RouteButton tone="sinal" onClick={() => setEnabled(true)}>Ativar som</RouteButton>
-          <button className="btn ghost-light block" onClick={() => say("Teste de som do Fedha Live.")}>Testar som</button>
+          <button className="btn ghost-light block" onClick={() => say("Teste de som do Fedha Live.")}><Volume2 aria-hidden />Testar som</button>
           <p style={{ textAlign: "center", fontSize: 13, color: "rgba(255,255,255,.8)" }}>Usa o Player só se transmites pela app nativa. Com o overlay ligado, as mensagens tocam lá.</p>
         </>
       ) : (
@@ -80,8 +80,8 @@ export function Player({ backTo, title = "Player" }: { backTo: string; title?: s
           <div className="panel">
             <Volume value={vol} onChange={setVol} dark />
             <div className="grid g2" style={{ gridTemplateColumns: "1fr 1fr" }}>
-              <button className="btn ghost-light" onClick={() => setIdx((i) => Math.max(0, i - 1))}>Repetir a última</button>
-              <button className="btn ghost-light" onClick={() => { say("Teste de som do Fedha Live."); toast.show("Som de teste a tocar"); }}>Testar som</button>
+              <button className="btn ghost-light" onClick={() => setIdx((i) => Math.max(0, i - 1))}><RotateCcw aria-hidden />Repetir a última</button>
+              <button className="btn ghost-light" onClick={() => { say("Teste de som do Fedha Live."); toast.show("Som de teste a tocar"); }}><Volume2 aria-hidden />Testar som</button>
             </div>
             <label className="row between" style={{ fontSize: 14, borderTop: "1px solid rgba(255,255,255,.15)", paddingTop: 12 }}>
               Manter ecrã ligado

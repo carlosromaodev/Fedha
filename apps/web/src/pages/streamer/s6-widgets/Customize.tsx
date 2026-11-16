@@ -1,7 +1,7 @@
 import { useEffect, useState, type ReactNode } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { Topbar } from "../../../layouts";
-import { Field, RouteButton, Volume, copy, useToast } from "../../../shared/ui";
+import { Field, RouteButton, Volume, copy, useToast, Speaker, Play } from "../../../shared/ui";
 import { goal, pastGoals } from "../../../shared/mocks/data";
 import { cx, kz } from "../../../shared/lib/format";
 import { AlertCard } from "../../../features/overlay-setup/Previews";
@@ -109,13 +109,13 @@ function AlertSettings() {
             <div className="card">
               <span className="eyebrow">Som</span>
               <Row label="Som de entrada" sub="Toca durante a entrada">
-                <div className="row" style={{ gap: 8 }}><select value={sound} onChange={(e) => setSound(e.target.value)} aria-label="Som de entrada">{SOUNDS.map((s) => <option key={s}>{s}</option>)}</select><button className="play-mini" aria-label="Ouvir">▶</button></div>
+                <div className="row" style={{ gap: 8 }}><select value={sound} onChange={(e) => setSound(e.target.value)} aria-label="Som de entrada">{SOUNDS.map((s) => <option key={s}>{s}</option>)}</select><button className="play-mini" aria-label="Ouvir"><Play size={12} fill="currentColor" /></button></div>
               </Row>
               <Row label="Som do nível super">
-                <div className="row" style={{ gap: 8 }}><select value={superSound} onChange={(e) => setSuperSound(e.target.value)} aria-label="Som do nível super">{SOUNDS.map((s) => <option key={s}>{s}</option>)}</select><button className="play-mini" aria-label="Ouvir">▶</button></div>
+                <div className="row" style={{ gap: 8 }}><select value={superSound} onChange={(e) => setSuperSound(e.target.value)} aria-label="Som do nível super">{SOUNDS.map((s) => <option key={s}>{s}</option>)}</select><button className="play-mini" aria-label="Ouvir"><Play size={12} fill="currentColor" /></button></div>
               </Row>
               <Row label="Voz padrão">
-                <div className="row" style={{ gap: 8 }}><select value={voice} onChange={(e) => setVoice(e.target.value)} aria-label="Voz padrão">{VOICES.map((s) => <option key={s}>{s}</option>)}</select><button className="play-mini" aria-label="Ouvir">▶</button></div>
+                <div className="row" style={{ gap: 8 }}><select value={voice} onChange={(e) => setVoice(e.target.value)} aria-label="Voz padrão">{VOICES.map((s) => <option key={s}>{s}</option>)}</select><button className="play-mini" aria-label="Ouvir"><Play size={12} fill="currentColor" /></button></div>
               </Row>
               <Row label="Volume do alerta"><div style={{ width: 260 }}><Volume value={vol} onChange={setVol} /></div></Row>
             </div>
@@ -221,7 +221,7 @@ function OtherWidgets({ focus }: { focus: string }) {
           <div className="card">
             <h2><span className="mono muted" style={{ fontSize: 12, marginRight: 8 }}>C5</span>Só áudio · Player</h2>
             <p className="muted" style={{ fontSize: 14, marginTop: 10, lineHeight: 1.5 }}>Live pela app nativa: nenhum widget é visível. O Player toca o som noutro aparelho ou numa coluna.</p>
-            <Link className="btn block" style={{ marginTop: 14 }} to="/painel/player">Abrir Player</Link>
+            <Link className="btn block" style={{ marginTop: 14 }} to="/painel/player"><Speaker aria-hidden />Abrir Player</Link>
           </div>
         </div>
       </div>

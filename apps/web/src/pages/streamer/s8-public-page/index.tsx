@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Topbar } from "../../../layouts";
-import { Field, LiveBadge, RouteButton, Tag, useToast } from "../../../shared/ui";
+import { Field, LiveBadge, RouteButton, Tag, useToast, ExternalLink, Camera } from "../../../shared/ui";
 import { streamer } from "../../../shared/mocks/data";
 import { initials } from "../../../shared/lib/format";
 
@@ -18,7 +18,7 @@ export default function PublicPage() {
   return (
     <>
       <Topbar title="Página pública" sub={`fedha.live/${slug}`}>
-        <a className="btn hide-m" href={`/${streamer.handle}`} target="_blank" rel="noreferrer">Ver página</a>
+        <a className="btn hide-m" href={`/${streamer.handle}`} target="_blank" rel="noreferrer"><ExternalLink aria-hidden />Ver página</a>
         <div style={{ width: 220 }}><RouteButton size="sm" disabled={!!slugErr || !name.trim()} onClick={() => toast.show("Alterações publicadas")}>Publicar alterações</RouteButton></div>
       </Topbar>
       <div className="page">
@@ -26,7 +26,7 @@ export default function PublicPage() {
           <div className="card pad-l stack" style={{ gap: 14 }}>
             <div className="row" style={{ gap: 14 }}>
               <span className="avatar l" style={{ width: 64, height: 64, fontSize: 20 }}>{initials(name || "?")}</span>
-              <label className="btn sm" style={{ cursor: "pointer" }}>Alterar foto<input type="file" accept="image/png,image/jpeg" className="sr-only" onChange={() => toast.show("Foto carregada")} /></label>
+              <label className="btn sm" style={{ cursor: "pointer" }}><Camera aria-hidden />Alterar foto<input type="file" accept="image/png,image/jpeg" className="sr-only" onChange={() => toast.show("Foto carregada")} /></label>
               <span className="muted" style={{ fontSize: 13 }}>JPG ou PNG, até 2 MB</span>
             </div>
             <div className="grid g2">

@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { Field, LiveBadge, Logo, RouteButton, Tag } from "../../../shared/ui";
+import { Field, LiveBadge, Logo, RouteButton, Tag, Pencil, ArrowLeft, Empty, Receipt } from "../../../shared/ui";
 import { streamer } from "../../../shared/mocks/data";
 import { kz, phone } from "../../../shared/lib/format";
 import { useDraft, type PayMethod } from "../../../features/composer/store";
@@ -19,9 +19,11 @@ export default function Checkout() {
 
   if (!draft.total) {
     return (
-      <div className="pub"><main className="pub-main">
-        <p>Não há nenhuma mensagem por pagar.</p>
-        <Link to={`/${streamer.handle}`} className="btn">Escrever mensagem</Link>
+      <div className="pub"><main className="pub-main" style={{ justifyContent: "center" }}>
+        <Empty title="Não há nenhuma mensagem por pagar" icon={Receipt}>
+          Escreve a tua mensagem na página de {streamer.name}. O valor aparece aqui antes de pagares.
+        </Empty>
+        <Link to={`/${streamer.handle}`} className="btn dark block"><Pencil aria-hidden />Escrever mensagem</Link>
       </main></div>
     );
   }
@@ -46,7 +48,7 @@ export default function Checkout() {
       <main className="pub-main ck-main">
         <div className="ck-left stack" style={{ gap: 14 }}>
         <div className="pub-top">
-          <Link to={`/${streamer.handle}`} className="link" style={{ textDecoration: "none" }}>← Editar</Link>
+          <Link to={`/${streamer.handle}`} className="link" style={{ textDecoration: "none", display: "inline-flex", alignItems: "center", gap: 4 }}><ArrowLeft size={16} aria-hidden />Editar</Link>
           <span className="eyebrow">Passo 2 de 3</span>
         </div>
         <h1>Pagamento</h1>

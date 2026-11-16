@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Topbar } from "../../../layouts";
-import { Field, RouteButton, Tag, useToast } from "../../../shared/ui";
+import { Field, RouteButton, Tag, useToast, Flag, Pencil } from "../../../shared/ui";
 import { goal } from "../../../shared/mocks/data";
 import { cx, kz } from "../../../shared/lib/format";
 
@@ -55,8 +55,8 @@ export default function Goals() {
                     <input type="checkbox" className="selo on-verde" checked={showW2} onChange={(e) => setShowW2(e.target.checked)} /> Mostrar no widget W2
                   </label>
                   <div className="row" style={{ gap: 8 }}>
-                    <button className="btn ghost-light">Editar</button>
-                    <button className="btn ghost-light" onClick={() => { setActive(null); toast.show("Meta terminada"); }}>Terminar meta</button>
+                    <button className="btn ghost-light"><Pencil aria-hidden />Editar</button>
+                    <button className="btn ghost-light" onClick={() => { setActive(null); toast.show("Meta terminada"); }}><Flag aria-hidden />Terminar meta</button>
                   </div>
                 </div>
               </div>
@@ -68,7 +68,7 @@ export default function Goals() {
               <div className="lines" style={{ marginTop: 8 }}>
                 {PAST.map((g) => (
                   <div key={g.title} className="row" style={{ gap: 12, flexWrap: "wrap" }}>
-                    <span className="grow">{g.title}</span>
+                    <span style={{ flex: "1 1 180px", minWidth: 0 }}>{g.title}</span>
                     <span className="kz" style={{ fontSize: 13 }}>{kz(g.current, false)} / {kz(g.target)}</span>
                     <Tag tone={g.status === "concluída" ? "ok" : undefined}>{g.status}</Tag>
                   </div>

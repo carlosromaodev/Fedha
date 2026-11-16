@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { RouteButton, copy, useToast } from "../../../shared/ui";
+import { RouteButton, copy, useToast, Download, Share2 } from "../../../shared/ui";
 import { streamer } from "../../../shared/mocks/data";
 import { kz } from "../../../shared/lib/format";
 import { useDraft } from "../../../features/composer/store";
@@ -56,8 +56,8 @@ export default function Confirmation() {
       </main>
       <footer className="pub-foot">
         <div className="grid g2" style={{ gridTemplateColumns: "1fr 1fr" }}>
-          <button className="btn ghost-light block" onClick={() => toast.show("O recibo PDF fica disponível quando a API estiver ligada")}>Descarregar recibo</button>
-          <button className="btn ghost-light block" onClick={() => { copy(`https://fedha.live/r/${id}`); toast.show("Link do recibo copiado"); }}>Partilhar</button>
+          <button className="btn ghost-light block" onClick={() => toast.show("O recibo PDF fica disponível quando a API estiver ligada")}><Download aria-hidden />Descarregar recibo</button>
+          <button className="btn ghost-light block" onClick={() => { copy(`https://fedha.live/r/${id}`); toast.show("Link do recibo copiado"); }}><Share2 aria-hidden />Partilhar</button>
         </div>
         <RouteButton tone="sinal" onClick={() => { reset(); nav(`/${streamer.handle}`); }}>Enviar outra mensagem</RouteButton>
       </footer>

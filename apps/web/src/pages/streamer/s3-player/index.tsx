@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { Topbar } from "../../../layouts";
-import { Tag, Volume, useToast } from "../../../shared/ui";
+import { Tag, Volume, useToast, RotateCcw, Smartphone, Volume2 } from "../../../shared/ui";
 import { queue } from "../../../shared/mocks/data";
 import { kz } from "../../../shared/lib/format";
 
@@ -14,8 +14,8 @@ export default function PlayerPage() {
   return (
     <>
       <Topbar title="Player" sub="Para lives sem widget ou para tocar numa coluna">
-        <Link to="/player" className="btn hide-m">Abrir no telemóvel</Link>
-        <button className="btn" onClick={() => toast.show("Som de teste a tocar em todas as saídas")}>Testar som</button>
+        <Link to="/player" className="btn hide-m"><Smartphone aria-hidden />Abrir no telemóvel</Link>
+        <button className="btn" onClick={() => toast.show("Som de teste a tocar em todas as saídas")}><Volume2 aria-hidden />Testar som</button>
       </Topbar>
       <div className="page">
         <div className="split">
@@ -28,7 +28,7 @@ export default function PlayerPage() {
             </div>
             <div className="progress"><i style={{ width: "32%" }} /></div>
             <div className="row" style={{ gap: 16 }}>
-              <button className="btn ghost-light" onClick={() => toast.show("A repetir a última mensagem só neste Player")}>Repetir a última</button>
+              <button className="btn ghost-light" onClick={() => toast.show("A repetir a última mensagem só neste Player")}><RotateCcw aria-hidden />Repetir a última</button>
               <div className="grow"><Volume value={vol} onChange={setVol} dark /></div>
             </div>
           </div>

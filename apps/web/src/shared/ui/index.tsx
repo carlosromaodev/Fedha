@@ -1,6 +1,16 @@
 import { useEffect, useRef, useState, type ButtonHTMLAttributes, type ReactNode } from "react";
+import { createPortal } from "react-dom";
 import { Link } from "react-router-dom";
 import { cx, kz } from "../lib/format";
+import { ArrowRight, CheckCircle2, Inbox, MoreHorizontal, X, type LucideIcon } from "./icons";
+
+export * from "./icons";
+export { Skeleton, PageSkeleton } from "./skeleton";
+
+/** Vibração curta (Android/Chrome); no resto é ignorada sem erro. */
+export function haptic(ms: number | number[] = 8) {
+  try { if (typeof navigator !== "undefined" && "vibrate" in navigator) navigator.vibrate(ms); } catch { /* sem suporte */ }
+}
 
 export function Logo({ to = "/" }: { to?: string }) {
   return (
@@ -12,12 +22,12 @@ export function Logo({ to = "/" }: { to?: string }) {
 
 type RouteBtnProps = ButtonHTMLAttributes<HTMLButtonElement> & { value?: number; tone?: "verde" | "sinal"; size?: "sm" };
 /** Botão de rota: cápsula com o símbolo na ponta; o valor viaja dentro do botão. */
-export function RouteButton({ children, value, tone = "verde", size, className, ...rest }: RouteBtnProps) {
+export function RouteButton({ children, value, tone = "verde", size, className, onClick, ...rest }: RouteBtnProps) {
   return (
-    <button className={cx("btn-route", tone === "sinal" && "sinal", size, className)} {...rest}>
+    <button className={cx("btn-route", tone === "sinal" && "sinal", size, className)} onClick={(e) => { haptic(12); onClick?.(e); }} {...rest}>
       <span className="label">{children}</span>
       {value !== undefined && <span className="val">{kz(value)}</span>}
-      <span className="dot" aria-hidden />
+      <span className="dot" aria-hidden><ArrowRight strokeWidth={2.4} /></span>
     </button>
   );
 }
@@ -47,7 +57,7 @@ export function Talao({ name, text, value, meta, tone, onMenu, children }: {
       <div className="canhoto" style={{ flexDirection: "column", alignItems: "flex-end", justifyContent: "center", gap: 2 }}>
         <span>{typeof value === "number" ? kz(value) : value}</span>
         {onMenu && (
-          <button aria-label="Mais ações" onClick={onMenu} style={{ border: 0, background: "none", padding: 0, color: "var(--tinta-3)", lineHeight: 1 }}>···</button>
+          <button className="icon-btn" aria-label="Mais ações" onClick={onMenu}><MoreHorizontal size={18} /></button>
         )}
       </div>
     </div>
@@ -154,7 +164,7 @@ export function Modal({ title, onClose, closable, children }: { title: string; o
       <div className="modal" role="dialog" aria-modal="true" aria-label={title}>
         <div className="row between" style={{ alignItems: "baseline", gap: 12 }}>
           <h2>{title}</h2>
-          {closable && <button className="icon-btn" style={{ fontSize: 13 }} onClick={onClose}>Fechar ×</button>}
+          {closable && <button className="icon-btn round" aria-label="Fechar" onClick={onClose}><X size={18} /></button>}
         </div>
         {children}
       </div>
@@ -169,7 +179,11 @@ export function useToast() {
     const t = setTimeout(() => setMsg(null), 2400);
     return () => clearTimeout(t);
   }, [msg]);
-  return { show: setMsg, node: msg ? <div className="toast" role="status">{msg}</div> : null };
+  const show = (m: string) => { setMsg(null); requestAnimationFrame(() => setMsg(m)); haptic(10); };
+  const node = msg && typeof document !== "undefined"
+    ? createPortal(<div className="toast" role="status"><CheckCircle2 size={18} className="toast-i" />{msg}</div>, document.body)
+    : null;
+  return { show, node };
 }
 
 export function Stat({ label, value, sub, tone, children }: { label: string; value: ReactNode; sub?: ReactNode; tone?: "verde"; children?: ReactNode }) {
@@ -183,10 +197,10 @@ export function Stat({ label, value, sub, tone, children }: { label: string; val
   );
 }
 
-export function Empty({ title, children }: { title: string; children?: ReactNode }) {
+export function Empty({ title, icon: Icon = Inbox, children }: { title: string; icon?: LucideIcon; children?: ReactNode }) {
   return (
     <div className="vazio">
-      <span className="simb" aria-hidden />
+      <span className="simb" aria-hidden><Icon size={20} /></span>
       <b style={{ color: "var(--tinta)" }}>{title}</b>
       {children && <p style={{ maxWidth: 360, fontSize: 14 }}>{children}</p>}
     </div>
@@ -203,5 +217,17 @@ export function useCountdown(seconds: number) {
 }
 
 export function copy(text: string) {
-  try { void navigator.clipboard?.writeText(text); } catch { /* sem permissão */ }
+  haptic(10);
+  const fallback = () => {
+    // Sem API de clipboard (http, WebView antiga, permissão negada): copia por um campo escondido.
+    try {
+      const t = document.createElement("textarea");
+      t.value = text; t.setAttribute("readonly", ""); t.style.position = "fixed"; t.style.opacity = "0";
+      document.body.appendChild(t); t.select(); document.execCommand("copy"); t.remove();
+    } catch { /* nada a fazer */ }
+  };
+  try {
+    if (navigator.clipboard?.writeText) navigator.clipboard.writeText(text).catch(fallback);
+    else fallback();
+  } catch { fallback(); }
 }
