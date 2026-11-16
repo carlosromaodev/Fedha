@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Topbar } from "../../../layouts";
-import { Field, Modal, RouteButton, Tag, useToast } from "../../../shared/ui";
+import { Field, Modal, RouteButton, Tag, useToast, Search } from "../../../shared/ui";
 import { kycQueue } from "../../../shared/mocks/data";
 import { cx, kz } from "../../../shared/lib/format";
 
@@ -47,7 +47,7 @@ export default function KycQueue() {
               <div className="grid g3" style={{ marginTop: 14, gridTemplateColumns: "repeat(3,1fr)" }}>
                 {DOCS.map((d) => (
                   <button key={d} onClick={() => setDoc(d)} className={cx("doc-thumb", doc === d && "on")}>
-                    <span className="tag">↗ Ampliar</span><span className="eyebrow">{d === "Selfie" ? "Selfie com BI" : d}</span>
+                    <span className="tag"><Search size={11} />Ampliar</span><span className="eyebrow">{d === "Selfie" ? "Selfie com BI" : d}</span>
                   </button>
                 ))}
               </div>

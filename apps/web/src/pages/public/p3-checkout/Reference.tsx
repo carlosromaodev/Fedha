@@ -1,4 +1,4 @@
-import { copy, useToast } from "../../../shared/ui";
+import { copy, useToast, Copy } from "../../../shared/ui";
 import { kz } from "../../../shared/lib/format";
 import { useDraft } from "../../../features/composer/store";
 
@@ -21,7 +21,7 @@ export default function Reference() {
         {rows.map((r) => (
           <div key={r.label} className="ref-talao">
             <div><div className="eyebrow">{r.label}</div><div className="val">{r.value}</div></div>
-            <button onClick={() => { copy(r.value.replace(/\s/g, "")); toast.show(`${r.label} copiada`); }}>Copiar</button>
+            <button onClick={() => { copy(r.value.replace(/\s/g, "")); toast.show(`${r.label} copiada`); }}><Copy size={16} aria-hidden /><br />Copiar</button>
           </div>
         ))}
         <div className="row between">

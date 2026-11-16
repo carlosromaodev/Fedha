@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import { Topbar } from "../../../layouts";
-import { Empty, Modal, Tag, useToast } from "../../../shared/ui";
+import { Empty, Modal, Tag, useToast, Download } from "../../../shared/ui";
 import { transactions, type TxStatus } from "../../../shared/mocks/data";
 import { cx, kz, maskPhone } from "../../../shared/lib/format";
 
@@ -29,7 +29,7 @@ export default function Transactions() {
   return (
     <>
       <Topbar title="Transações" sub="Hoje · 612 transações">
-        <button className="btn" onClick={() => toast.show("Exportação CSV pedida")}>Exportar CSV</button>
+        <button className="btn" onClick={() => toast.show("Exportação CSV pedida")}><Download aria-hidden />Exportar CSV</button>
       </Topbar>
       <div className="page">
         <div className="row" style={{ gap: 8, flexWrap: "wrap" }}>

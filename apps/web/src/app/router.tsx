@@ -1,18 +1,29 @@
 import { lazy, Suspense, type ReactNode } from "react";
-import { createBrowserRouter, Navigate, Outlet } from "react-router-dom";
+import { createBrowserRouter, Navigate, Outlet, useLocation } from "react-router-dom";
 import { AdminLayout, AuthLayout, StreamerLayout } from "../layouts";
 import { DraftProvider } from "../features/composer/store";
+import { PageSkeleton } from "../shared/ui/skeleton";
+import { NotFound, RouteError } from "../pages/system";
 
 const L = (f: () => Promise<{ default: React.ComponentType }>) => {
   const C = lazy(f);
   return <C />;
 };
-const S = ({ children }: { children: ReactNode }) => <Suspense fallback={<div className="skel" style={{ height: 4 }} />}>{children}</Suspense>;
+/** Enquanto o código da página chega, mostra um esqueleto com a forma da página (nada de ecrã em branco). */
+const S = ({ children, variant = "pub" }: { children: ReactNode; variant?: "page" | "pub" }) => (
+  <Suspense fallback={<PageSkeleton variant={variant} />}>{children}</Suspense>
+);
 
-const Donor = () => <DraftProvider><S><Outlet /></S></DraftProvider>;
+/** Fluxo do doador: cada passo entra com uma transição curta, como numa app. */
+function Donor() {
+  const { pathname } = useLocation();
+  return <DraftProvider><S><div key={pathname} className="route-in"><Outlet /></div></S></DraftProvider>;
+}
 const Lazy = ({ children }: { children: ReactNode }) => <S>{children}</S>;
+const Panel = ({ children }: { children: ReactNode }) => <S variant="page">{children}</S>;
 
 export const router = createBrowserRouter([
+  { path: "/404", element: <NotFound /> },
   { path: "/", element: <Lazy>{L(() => import("../pages/public/p1-landing"))}</Lazy> },
   { path: "/pedido", element: <Lazy>{L(() => import("../pages/public/p5-order-lookup"))}</Lazy> },
 
@@ -35,23 +46,23 @@ export const router = createBrowserRouter([
     path: "/painel",
     element: <StreamerLayout />,
     children: [
-      { index: true, element: <Lazy>{L(() => import("../pages/streamer/s1-dashboard"))}</Lazy> },
-      { path: "fila", element: <Lazy>{L(() => import("../pages/streamer/s2-live-queue"))}</Lazy> },
-      { path: "player", element: <Lazy>{L(() => import("../pages/streamer/s3-player"))}</Lazy> },
-      { path: "widgets", element: <Lazy>{L(() => import("../pages/streamer/s6-widgets"))}</Lazy> },
-      { path: "widgets/ajuda", element: <Lazy>{L(() => import("../pages/streamer/s6-widgets/Troubleshoot"))}</Lazy> },
-      { path: "widgets/:id", element: <Lazy>{L(() => import("../pages/streamer/s6-widgets/Customize"))}</Lazy> },
+      { index: true, element: <Panel>{L(() => import("../pages/streamer/s1-dashboard"))}</Panel> },
+      { path: "fila", element: <Panel>{L(() => import("../pages/streamer/s2-live-queue"))}</Panel> },
+      { path: "player", element: <Panel>{L(() => import("../pages/streamer/s3-player"))}</Panel> },
+      { path: "widgets", element: <Panel>{L(() => import("../pages/streamer/s6-widgets"))}</Panel> },
+      { path: "widgets/ajuda", element: <Panel>{L(() => import("../pages/streamer/s6-widgets/Troubleshoot"))}</Panel> },
+      { path: "widgets/:id", element: <Panel>{L(() => import("../pages/streamer/s6-widgets/Customize"))}</Panel> },
       { path: "overlay", element: <Navigate to="/painel/widgets" replace /> },
-      { path: "historico", element: <Lazy>{L(() => import("../pages/streamer/s4-history"))}</Lazy> },
-      { path: "carteira", element: <Lazy>{L(() => import("../pages/streamer/s11-withdrawals"))}</Lazy> },
-      { path: "metas", element: <Lazy>{L(() => import("../pages/streamer/s7-goals"))}</Lazy> },
-      { path: "pagina", element: <Lazy>{L(() => import("../pages/streamer/s8-public-page"))}</Lazy> },
-      { path: "precos", element: <Lazy>{L(() => import("../pages/streamer/s5-pricing"))}</Lazy> },
+      { path: "historico", element: <Panel>{L(() => import("../pages/streamer/s4-history"))}</Panel> },
+      { path: "carteira", element: <Panel>{L(() => import("../pages/streamer/s11-withdrawals"))}</Panel> },
+      { path: "metas", element: <Panel>{L(() => import("../pages/streamer/s7-goals"))}</Panel> },
+      { path: "pagina", element: <Panel>{L(() => import("../pages/streamer/s8-public-page"))}</Panel> },
+      { path: "precos", element: <Panel>{L(() => import("../pages/streamer/s5-pricing"))}</Panel> },
       { path: "filtros", element: <Navigate to="/painel/precos" replace /> },
-      { path: "assistentes", element: <Lazy>{L(() => import("../pages/streamer/s10-assistants"))}</Lazy> },
-      { path: "notificacoes", element: <Lazy>{L(() => import("../pages/streamer/s13-notifications"))}</Lazy> },
-      { path: "conta", element: <Lazy>{L(() => import("../pages/streamer/s14-settings"))}</Lazy> },
-      { path: "ajuda", element: <Lazy>{L(() => import("../pages/streamer/s15-support"))}</Lazy> },
+      { path: "assistentes", element: <Panel>{L(() => import("../pages/streamer/s10-assistants"))}</Panel> },
+      { path: "notificacoes", element: <Panel>{L(() => import("../pages/streamer/s13-notifications"))}</Panel> },
+      { path: "conta", element: <Panel>{L(() => import("../pages/streamer/s14-settings"))}</Panel> },
+      { path: "ajuda", element: <Panel>{L(() => import("../pages/streamer/s15-support"))}</Panel> },
     ],
   },
   // Player em ecrã inteiro, pensado para o telemóvel ligado à coluna.
@@ -65,19 +76,19 @@ export const router = createBrowserRouter([
     path: "/admin",
     element: <AdminLayout />,
     children: [
-      { index: true, element: <Lazy>{L(() => import("../pages/admin/b1-overview"))}</Lazy> },
-      { path: "transacoes", element: <Lazy>{L(() => import("../pages/admin/b4-transactions"))}</Lazy> },
-      { path: "reembolsos", element: <Lazy>{L(() => import("../pages/admin/b4-transactions/Failures"))}</Lazy> },
-      { path: "falhas", element: <Lazy>{L(() => import("../pages/admin/b4-transactions/Failures"))}</Lazy> },
-      { path: "levantamentos", element: <Lazy>{L(() => import("../pages/admin/b6-withdrawals"))}</Lazy> },
-      { path: "streamers", element: <Lazy>{L(() => import("../pages/admin/b2-streamers"))}</Lazy> },
-      { path: "verificacoes", element: <Lazy>{L(() => import("../pages/admin/b3-kyc-queue"))}</Lazy> },
-      { path: "reconciliacao", element: <Lazy>{L(() => import("../pages/admin/b5-reconciliation"))}</Lazy> },
-      { path: "antifraude", element: <Lazy>{L(() => import("../pages/admin/b7-fraud"))}</Lazy> },
-      { path: "moderacao", element: <Lazy>{L(() => import("../pages/admin/b8-moderation"))}</Lazy> },
-      { path: "configuracoes", element: <Lazy>{L(() => import("../pages/admin/b9-settings"))}</Lazy> },
-      { path: "suporte", element: <Lazy>{L(() => import("../pages/admin/b10-support"))}</Lazy> },
-      { path: "papeis", element: <Lazy>{L(() => import("../pages/admin/b11-admins-audit"))}</Lazy> },
+      { index: true, element: <Panel>{L(() => import("../pages/admin/b1-overview"))}</Panel> },
+      { path: "transacoes", element: <Panel>{L(() => import("../pages/admin/b4-transactions"))}</Panel> },
+      { path: "reembolsos", element: <Panel>{L(() => import("../pages/admin/b4-transactions/Failures"))}</Panel> },
+      { path: "falhas", element: <Panel>{L(() => import("../pages/admin/b4-transactions/Failures"))}</Panel> },
+      { path: "levantamentos", element: <Panel>{L(() => import("../pages/admin/b6-withdrawals"))}</Panel> },
+      { path: "streamers", element: <Panel>{L(() => import("../pages/admin/b2-streamers"))}</Panel> },
+      { path: "verificacoes", element: <Panel>{L(() => import("../pages/admin/b3-kyc-queue"))}</Panel> },
+      { path: "reconciliacao", element: <Panel>{L(() => import("../pages/admin/b5-reconciliation"))}</Panel> },
+      { path: "antifraude", element: <Panel>{L(() => import("../pages/admin/b7-fraud"))}</Panel> },
+      { path: "moderacao", element: <Panel>{L(() => import("../pages/admin/b8-moderation"))}</Panel> },
+      { path: "configuracoes", element: <Panel>{L(() => import("../pages/admin/b9-settings"))}</Panel> },
+      { path: "suporte", element: <Panel>{L(() => import("../pages/admin/b10-support"))}</Panel> },
+      { path: "papeis", element: <Panel>{L(() => import("../pages/admin/b11-admins-audit"))}</Panel> },
     ],
   },
 
@@ -92,4 +103,5 @@ export const router = createBrowserRouter([
       { path: "/r/:id", element: L(() => import("../pages/public/p4-confirmation")) },
     ],
   },
-]);
+  { path: "*", element: <NotFound /> },
+].map((r) => ({ ...r, errorElement: <RouteError /> })));

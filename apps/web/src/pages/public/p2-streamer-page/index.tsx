@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Field, LiveBadge, RouteButton, Tag, VoiceMeter, Wave, Logo } from "../../../shared/ui";
+import { Field, LiveBadge, RouteButton, Tag, VoiceMeter, Wave, Logo, Play } from "../../../shared/ui";
 import { PLATFORM_LABEL, effects, pricing, queue, streamer, voices } from "../../../shared/mocks/data";
 import { FILTER_MSG, checkMessage, priceText, textTier } from "../../../shared/lib/rules";
 import { cx, kz, mmss } from "../../../shared/lib/format";
@@ -140,7 +140,7 @@ export default function StreamerPage() {
               </div>
 
               <button className="sp-listen" onClick={() => speak(text || "Escreve a mensagem para ouvires como vai soar.")}>
-                <span className="play" aria-hidden>▶</span>
+                <span className="play" aria-hidden><Play size={14} fill="currentColor" /></span>
                 <span className="grow" style={{ textAlign: "left" }}>Ouvir como vai soar</span>
                 <Wave n={14} tone="verde" still />
               </button>
@@ -162,7 +162,7 @@ export default function StreamerPage() {
                       <label key={fx.id} className="row" style={{ gap: 10 }}>
                         <input type="radio" name="fx" className="selo round" checked={effect === fx.id} onChange={() => setEffect(fx.id)} />
                         <span className="grow">{fx.name} <small className="muted">1 s</small></span>
-                        <button type="button" className="row link" style={{ gap: 6, textDecoration: "none", color: "var(--tinta)" }} onClick={() => speak(fx.name)}><span className="play-mini" style={{ width: 22, height: 22, fontSize: 8, background: "var(--tinta)" }}>▶</span>Ouvir exemplo</button>
+                        <button type="button" className="row link" style={{ gap: 6, textDecoration: "none", color: "var(--tinta)" }} onClick={() => speak(fx.name)}><span className="play-mini" style={{ width: 22, height: 22, fontSize: 8, background: "var(--tinta)" }}><Play size={10} fill="currentColor" /></span>Ouvir exemplo</button>
                       </label>
                     ))}
                   </div>

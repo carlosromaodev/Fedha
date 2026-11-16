@@ -1,6 +1,6 @@
 import { Link, useNavigate } from "react-router-dom";
 import { Topbar } from "../../../layouts";
-import { RouteButton, Tag, copy, useToast } from "../../../shared/ui";
+import { RouteButton, Tag, copy, useToast, Copy, ExternalLink, Pencil, Wrench } from "../../../shared/ui";
 import { PLATFORM_LABEL, streamer, type Platform } from "../../../shared/mocks/data";
 import { useWidgets } from "../../../features/overlay-setup/api";
 import { cx } from "../../../shared/lib/format";
@@ -32,7 +32,7 @@ export default function Widgets() {
   return (
     <>
       <Topbar title="Widgets" sub="Cada widget é um link que colas no programa de transmissão">
-        <Link to="/painel/widgets/ajuda" className="btn hide-m">Resolver problemas</Link>
+        <Link to="/painel/widgets/ajuda" className="btn hide-m"><Wrench aria-hidden />Resolver problemas</Link>
         <div style={{ width: 230 }}><RouteButton size="sm" onClick={test}>Enviar alerta de teste</RouteButton></div>
       </Topbar>
       <div className="page">
@@ -67,10 +67,10 @@ export default function Widgets() {
                 <WidgetPreview id={w.id} theme={w.config.theme} disabled={off} />
                 {w.warning && <p className="hint erro" style={{ marginTop: -4 }}>{w.warning}</p>}
                 <div className="row between">
-                  <button className="btn dark sm" disabled={off} onClick={() => { copy(widgetUrl(w, { dest })); toast.show(`Link do W${w.n} copiado. Não o mostres na live.`); }}>Copiar link</button>
+                  <button className="btn dark sm" disabled={off} onClick={() => { copy(widgetUrl(w, { dest })); toast.show(`Link do W${w.n} copiado. Não o mostres na live.`); }}><Copy aria-hidden />Copiar link</button>
                   <div className="row" style={{ gap: 6 }}>
-                    <a className="btn sm hide-m" href={widgetUrl(w, { dest, preview: true })} target="_blank" rel="noreferrer" aria-disabled={off} style={off ? { pointerEvents: "none", opacity: .45 } : undefined}>Abrir</a>
-                    <button className="btn sm" disabled={off} onClick={() => nav(`/painel/widgets/${w.id}`)}>Personalizar</button>
+                    <a className="btn sm hide-m" href={widgetUrl(w, { dest, preview: true })} target="_blank" rel="noreferrer" aria-disabled={off} style={off ? { pointerEvents: "none", opacity: .45 } : undefined}><ExternalLink aria-hidden />Abrir</a>
+                    <button className="btn sm" disabled={off} onClick={() => nav(`/painel/widgets/${w.id}`)}><Pencil aria-hidden />Personalizar</button>
                   </div>
                 </div>
               </div>

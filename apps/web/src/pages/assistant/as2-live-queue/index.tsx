@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { LiveBadge, Talao, Tag, Volume, Wave, useToast } from "../../../shared/ui";
+import { LiveBadge, Talao, Tag, Volume, Wave, useToast, Volume2 } from "../../../shared/ui";
 import { queue, streamer } from "../../../shared/mocks/data";
 import { kz } from "../../../shared/lib/format";
 
@@ -29,7 +29,7 @@ export default function AssistantQueue() {
           <div className="progress" style={{ marginTop: 12 }}><i style={{ width: "18%" }} /></div>
           <div className="row" style={{ gap: 12, marginTop: 14, paddingTop: 14, borderTop: "1px solid rgba(255,255,255,.15)" }}>
             <div className="grow"><Volume value={vol} onChange={setVol} dark /></div>
-            <button className="btn ghost-light sm" onClick={() => toast.show("Som de teste enviado")}>Testar</button>
+            <button className="btn ghost-light sm" onClick={() => toast.show("Som de teste enviado")}><Volume2 aria-hidden />Testar</button>
           </div>
         </div>
         {tab === "fila" ? (

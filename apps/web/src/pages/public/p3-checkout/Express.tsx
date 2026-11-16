@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, Navigate, useNavigate } from "react-router-dom";
 import { useCountdown } from "../../../shared/ui";
 import { streamer } from "../../../shared/mocks/data";
 import { kz, mmss, phone } from "../../../shared/lib/format";
@@ -19,6 +19,9 @@ export default function Express() {
     const t = setTimeout(() => nav(`/r/${draft.orderId}`), 6000);
     return () => clearTimeout(t);
   }, [nav, draft.orderId]);
+
+  // Sem pedido (ex.: link aberto diretamente): volta ao checkout, que explica o que fazer.
+  if (!draft.total) return <Navigate to={`/${streamer.handle}/pagar`} replace />;
 
   if (left === 0) {
     return (

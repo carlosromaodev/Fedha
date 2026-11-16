@@ -1,7 +1,7 @@
 import { useMemo, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { Topbar } from "../../../layouts";
-import { Empty, Tag, useToast } from "../../../shared/ui";
+import { Empty, Tag, useToast, Download, MoreHorizontal, ChevronDown, ChevronLeft, ChevronRight } from "../../../shared/ui";
 import { cx, kz } from "../../../shared/lib/format";
 
 type Row = { at: string; donor: string; type: string; text: string; extras: string; kz: number; status: "emitida" | "reembolsada"; platform: string };
@@ -51,7 +51,7 @@ export default function History() {
   return (
     <>
       <Topbar title="Histórico" sub={`214 mensagens em novembro · ${kz(412650)} líquido`}>
-        <button className="btn" onClick={exportCsv}>Exportar CSV</button>
+        <button className="btn" onClick={exportCsv}><Download aria-hidden />Exportar CSV</button>
       </Topbar>
       <div className="page">
         <div className="filters">
@@ -77,7 +77,7 @@ export default function History() {
                     <td className="num kz">{kz(r.kz)}</td>
                     <td className="num">{r.status === "emitida" ? <Tag tone="ok">Emitida</Tag> : <Tag tone="erro">Reembolsada</Tag>}</td>
                     <td style={{ position: "relative", width: 28 }}>
-                      <button className="icon-btn" aria-label="Mais ações" onClick={() => setMenu(menu === i ? null : i)}>···</button>
+                      <button className="icon-btn" aria-label="Mais ações" onClick={() => setMenu(menu === i ? null : i)}><MoreHorizontal size={18} /></button>
                       {menu === i && (
                         <div className="dropdown" role="menu" style={{ top: 34, right: 0 }}>
                           <button onClick={() => { setMenu(null); toast.show("Pedido de suporte aberto com esta mensagem"); }}>Pedir ajuda ao suporte</button>
@@ -93,13 +93,13 @@ export default function History() {
           <div className="pager">
             <span className="mono muted">{rows.length ? `${(page - 1) * PAGE + 1}–${Math.min(page * PAGE, rows.length)}` : 0} de 214</span>
             <div className="row" style={{ gap: 6 }}>
-              <button className="chip pg" disabled={page === 1} onClick={() => setPage(page - 1)} aria-label="Anterior">‹</button>
+              <button className="chip pg" disabled={page === 1} onClick={() => setPage(page - 1)} aria-label="Anterior"><ChevronLeft size={16} /></button>
               {[1, 2, 3].map((n) => <button key={n} className={cx("chip pg", page === n && "on")} disabled={n > pages} onClick={() => setPage(n)}>{n}</button>)}
               <button className="chip pg" disabled>…</button>
               <button className="chip pg" disabled>24</button>
-              <button className="chip pg" disabled={page >= pages} onClick={() => setPage(page + 1)} aria-label="Seguinte">›</button>
+              <button className="chip pg" disabled={page >= pages} onClick={() => setPage(page + 1)} aria-label="Seguinte"><ChevronRight size={16} /></button>
             </div>
-            <span className="muted" style={{ fontSize: 13 }}>8 por página ▾</span>
+            <span className="muted" style={{ fontSize: 13 }}>8 por página <ChevronDown size={14} /></span>
           </div>
         </div>
       </div>
