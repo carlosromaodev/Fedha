@@ -53,14 +53,23 @@ const Env = z.object({
   AZURE_TTS_REGION: z.string().optional(),
 
   // Mensagens
-  SMS_PROVIDER: z.enum(["console", "http"]).default("console"),
+  /** SMS: "ombala" (fornecedor angolano, o mesmo do MUTH e do UOR Connect), "http" (outro gateway) ou "console" (só log). */
+  SMS_PROVIDER: z.enum(["console", "ombala", "http"]).default("console"),
+  /** Remetente aprovado no fornecedor (até 11 caracteres). */
+  SMS_SENDER: z.string().max(11).default("FEDHA"),
+  OMBALA_API_URL: z.string().url().default("https://api.useombala.ao"),
+  OMBALA_API_TOKEN: z.string().optional(),
   SMS_HTTP_URL: z.string().optional(),
   SMS_HTTP_TOKEN: z.string().optional(),
-  SMS_SENDER: z.string().default("FEDHA"),
   EMAIL_PROVIDER: z.enum(["console", "resend"]).default("console"),
   RESEND_API_KEY: z.string().optional(),
   EMAIL_FROM: z.string().default("Fedha Live <nao-responder@fedha.live>"),
-  WHATSAPP_PROVIDER: z.enum(["console", "meta"]).default("console"),
+  /** WhatsApp: "evolution" (Evolution API self-hosted, como no UOR Connect), "meta" (Cloud API oficial) ou "console". */
+  WHATSAPP_PROVIDER: z.enum(["console", "evolution", "meta"]).default("console"),
+  EVOLUTION_API_URL: z.string().optional(),
+  EVOLUTION_API_KEY: z.string().optional(),
+  /** Nome da instância (o número ligado por QR code) na Evolution API. */
+  EVOLUTION_INSTANCE: z.string().default("fedha"),
   WHATSAPP_TOKEN: z.string().optional(),
   WHATSAPP_PHONE_ID: z.string().optional(),
 });
@@ -73,6 +82,12 @@ export function loadEnv(source: Record<string, string | undefined> = process.env
     if (env.JWT_SECRET.startsWith("dev-")) throw new Error("JWT_SECRET tem de ser definido em produção");
     if (/^0+$/.test(env.ENCRYPTION_KEY)) throw new Error("ENCRYPTION_KEY tem de ser definido em produção");
     if (env.DEV_EXPOSE_OTP) throw new Error("DEV_EXPOSE_OTP não pode estar ligado em produção");
+    // Os códigos de verificação (RN-CON-02) só chegam às pessoas com um fornecedor de SMS real.
+    if (env.SMS_PROVIDER === "console") throw new Error("SMS_PROVIDER=console não envia SMS: escolhe ombala ou http em produção");
+    if (env.SMS_PROVIDER === "ombala" && !env.OMBALA_API_TOKEN) throw new Error("OMBALA_API_TOKEN tem de ser definido com SMS_PROVIDER=ombala");
+    if (env.SMS_PROVIDER === "http" && !env.SMS_HTTP_URL) throw new Error("SMS_HTTP_URL tem de ser definido com SMS_PROVIDER=http");
+    if (env.WHATSAPP_PROVIDER === "evolution" && !(env.EVOLUTION_API_URL && env.EVOLUTION_API_KEY)) throw new Error("EVOLUTION_API_URL e EVOLUTION_API_KEY têm de ser definidos com WHATSAPP_PROVIDER=evolution");
+    if (env.WHATSAPP_PROVIDER === "meta" && !(env.WHATSAPP_TOKEN && env.WHATSAPP_PHONE_ID)) throw new Error("WHATSAPP_TOKEN e WHATSAPP_PHONE_ID têm de ser definidos com WHATSAPP_PROVIDER=meta");
   }
   return env;
 }

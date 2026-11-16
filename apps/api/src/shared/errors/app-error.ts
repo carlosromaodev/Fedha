@@ -16,3 +16,4 @@ export const notFound = (what = "Recurso") => new AppError(404, "not_found", `${
 export const conflict = (code: string, message: string, details?: Record<string, unknown>) => new AppError(409, code, message, details);
 export const unprocessable = (code: string, message: string, details?: Record<string, unknown>) => new AppError(422, code, message, details);
 export const tooMany = (message = "Demasiadas tentativas. Tenta mais tarde.") => new AppError(429, "too_many_requests", message);
+export const unavailable = (code: string, message: string) => new AppError(503, code, message);
