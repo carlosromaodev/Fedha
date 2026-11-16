@@ -131,11 +131,13 @@ export async function register(ctx: Ctx, body: RegisterBody, meta: { ip: string 
     await tx.insert(schema.notificationPrefs).values({ userId, prefs: DEFAULT_PREFS });
   });
   await ensureWidgets(ctx, streamerId);
-  const phoneCode = await sendOtp(ctx, { target: body.phone, purpose: "verify_phone", userId });
-  const emailCode = await sendOtp(ctx, { target: body.email, purpose: "verify_email", userId });
+  // A conta já existe: se um código não sair, a pessoa pede outro no ecrã de verificação (/v1/auth/otp/resend).
+  const unsent: Array<"phone" | "email"> = [];
+  const phoneCode = await sendOtp(ctx, { target: body.phone, purpose: "verify_phone", userId }).catch(() => { unsent.push("phone"); return undefined; });
+  const emailCode = await sendOtp(ctx, { target: body.email, purpose: "verify_email", userId }).catch(() => { unsent.push("email"); return undefined; });
   await audit(ctx, { actorId: userId, actorType: "streamer", action: "auth.register", streamerId, ip: meta.ip });
   const tokens = await issueTokens(ctx, await userById(ctx, userId), meta);
-  return { ...tokens, ...(phoneCode ? { devCodes: { phone: phoneCode, email: emailCode } } : {}) };
+  return { ...tokens, ...(unsent.length ? { unsentCodes: unsent } : {}), ...(phoneCode ? { devCodes: { phone: phoneCode, email: emailCode } } : {}) };
 }
 
 export const DEFAULT_PREFS = {

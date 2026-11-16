@@ -1,7 +1,7 @@
 import { and, desc, eq, gt, isNull } from "drizzle-orm";
 import { schema } from "../../../shared/database/client";
 import type { Ctx } from "../../../shared/context";
-import { badRequest, tooMany } from "../../../shared/errors/app-error";
+import { badRequest, tooMany, unavailable } from "../../../shared/errors/app-error";
 import { numericCode, uuid } from "../../../shared/security/ids";
 import { sha256 } from "../../../shared/security/crypto";
 
@@ -31,13 +31,21 @@ export async function sendOtp(ctx: Ctx, input: { target: string; purpose: OtpPur
   });
   if (last && now.getTime() - last.createdAt.getTime() < COOLDOWN_MS) throw tooMany("Espera um minuto antes de pedir outro código.");
   const code = numericCode(6);
+  const id = uuid();
   await ctx.db.insert(schema.otpCodes).values({
-    id: uuid(), userId: input.userId ?? null, target: input.target, purpose: input.purpose, codeHash: sha256(`${input.target}:${code}`),
+    id, userId: input.userId ?? null, target: input.target, purpose: input.purpose, codeHash: sha256(`${input.target}:${code}`),
     data: input.data ?? null, expiresAt: new Date(now.getTime() + TTL_MS), createdAt: now,
   });
   const msg = `Fedha Live: ${code} é ${TEXT[input.purpose]}. Válido 10 minutos. Não partilhes este código.`;
-  if (input.target.includes("@")) await ctx.messenger.email(input.target, "O teu código Fedha Live", msg);
-  else await ctx.messenger.sms(input.target, msg);
+  try {
+    if (input.target.includes("@")) await ctx.messenger.email(input.target, "O teu código Fedha Live", msg);
+    else await ctx.messenger.sms(input.target, msg);
+  } catch (err) {
+    // O código não saiu: apagamo-lo para a pessoa poder pedir outro já, sem esperar o minuto de intervalo.
+    await ctx.db.delete(schema.otpCodes).where(eq(schema.otpCodes.id, id));
+    ctx.log.error({ err, purpose: input.purpose }, "envio de código falhou");
+    throw unavailable("otp_send_failed", input.target.includes("@") ? "Não conseguimos enviar o email agora. Tenta de novo daqui a pouco." : "Não conseguimos enviar o SMS agora. Confirma o número e tenta de novo daqui a pouco.");
+  }
   return ctx.env.DEV_EXPOSE_OTP || ctx.env.NODE_ENV === "test" ? code : undefined;
 }
 

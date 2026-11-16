@@ -61,6 +61,11 @@ export async function buildApp(opts: BuildOptions = {}): Promise<{ app: FastifyI
   const storage = opts.storage ?? (env.NODE_ENV === "test" ? new MemoryStorage(env.PUBLIC_API_URL) : new LocalStorage(env.STORAGE_DIR, env.PUBLIC_API_URL));
   const tts: TtsEngine = env.TTS_PROVIDER === "azure" && env.AZURE_TTS_KEY && env.AZURE_TTS_REGION ? new AzureTts(env.AZURE_TTS_KEY, env.AZURE_TTS_REGION) : new MockTts();
   const messenger = new DefaultMessenger(env, app.log);
+  const msgStatus = messenger.status();
+  app.log.info({ sms: msgStatus.sms.provider, whatsapp: msgStatus.whatsapp.provider, email: msgStatus.email.provider }, "fornecedores de mensagens");
+  for (const [channel, st] of Object.entries(msgStatus)) {
+    if (st.missing.length) app.log.warn({ channel, provider: st.provider, missing: st.missing }, "fornecedor de mensagens sem configuração completa");
+  }
 
   const sandbox = new SandboxGateway(env.SANDBOX_WEBHOOK_SECRET, env.NODE_ENV === "test" ? 0 : env.SANDBOX_AUTO_CONFIRM_MS);
   const proxypay = new ProxyPayGateway(env.PROXYPAY_API_KEY, env.PROXYPAY_ENV, env.PROXYPAY_ENTITY);
