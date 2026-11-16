@@ -1,6 +1,7 @@
 /**
- * Configuração lida do URL do overlay. O URL é o que o streamer cola no OBS, LIVE Studio, PRISM ou CameraFi:
- *   /o/<token>?w=1&c=c1&theme=claro
+ * Configuração lida do URL do widget, servido pelo próprio site (RN-WID-01). É o link que o streamer copia em
+ * Widgets e cola no OBS, LIVE Studio, PRISM ou CameraFi:
+ *   https://fedha.live/o/<token>?w=1&layout=h   (layout h = horizontal 1920×1080, v = vertical 1080×1920)
  * O token é secreto e revogável; a configuração "a sério" (níveis, sons, tempos) vem da API.
  * Parâmetros extra servem para pré-visualização no painel e para testes: demo=1, reduce=1, api=<url>.
  */
@@ -43,7 +44,9 @@ export function readConfig(loc: Location = window.location): OverlayConfig {
   const q = new URLSearchParams(loc.search);
   const token = loc.pathname.match(/\/o\/([^/?#]+)/)?.[1] ?? q.get("t") ?? "demo";
   const w = Number(q.get("w") ?? 1);
-  const c = (q.get("c") ?? "c1") as Scenario;
+  // layout=h|v é o formato do link público (RF-WID-01); c=c1..c4 fica para pré-visualizações e testes.
+  const layout = q.get("layout");
+  const c = (q.get("c") ?? (layout === "v" ? "c2" : "c1")) as Scenario;
   const reduce = q.get("reduce") === "1" || window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
   return {
     token,

@@ -145,8 +145,8 @@ function AlertSettings() {
             </div>
             <div className="card">
               <span className="eyebrow">Link do widget</span>
-              <div className="row between" style={{ marginTop: 8, gap: 12 }}>
-                <span className="mono">{publicWidgetLink(w)}</span>
+              <div className="row between" style={{ marginTop: 8, gap: 12, flexWrap: "wrap" }}>
+                <span className="mono ellipsis" style={{ minWidth: 0 }}>{publicWidgetLink(w)}</span>
                 <span className="row" style={{ gap: 12 }}><button className="link" onClick={() => { copy(widgetUrl(w, { dest: destination })); toast.show("Link copiado"); }}>Copiar</button><button className="link" onClick={() => regenerate("w1").then(() => toast.show("Link antigo revogado. Cola o novo no programa."), (e) => toast.show(`Falhou: ${(e as Error).message}`))}>Gerar novo</button></span>
               </div>
               <p className="hint">Posição e tamanho: ajusta a camada no programa de transmissão. Recomendado: 1080×1920 no TikTok LIVE Studio, 1920×1080 no OBS.</p>
@@ -190,16 +190,16 @@ function OtherWidgets({ focus }: { focus: string }) {
             <Row label={`Mostrar "+ valor" a flutuar`}><T c /></Row>
             <Link to="/painel/metas" style={{ fontSize: 13 }}>Gerir metas</Link>
           </div>
-          <div className={box("w3")}>
-            <h2><span className="mono muted" style={{ fontSize: 12, marginRight: 8 }}>W3</span>Ranking</h2>
+          <div className={box("w4")}>
+            <h2><span className="mono muted" style={{ fontSize: 12, marginRight: 8 }}>W4</span>Top doadores</h2>
             <Row label="Período"><Seg label="Período" value={period} onChange={setPeriod} options={[["live", "Live"], ["dia", "Dia"], ["mes", "Mês"]]} /></Row>
             <Row label="Mostrar totais"><T c /></Row>
             <Row label="C1"><span>Top 5</span></Row>
             <Row label="C2 e C3"><span>Top 3</span></Row>
             <Row label={`Incluir "Anónimo"`}><T c={false} /></Row>
           </div>
-          <div className={box("w4")}>
-            <h2><span className="mono muted" style={{ fontSize: 12, marginRight: 8 }}>W4</span>Últimas mensagens</h2>
+          <div className={box("w3")}>
+            <h2><span className="mono muted" style={{ fontSize: 12, marginRight: 8 }}>W3</span>Últimas mensagens</h2>
             <Row label="C1"><span>Lista de 5</span></Row>
             <Row label="C2 e C3"><span>Ticker</span></Row>
             <Row label="Velocidade do ticker"><Seg label="Velocidade" value={speed} onChange={setSpeed} options={[["lenta", "Lenta"], ["normal", "Normal"]]} /></Row>

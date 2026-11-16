@@ -25,7 +25,8 @@ export default function Verify() {
   };
 
   return (
-    <StepsLayout step={1} title="Confirma o teu telemóvel" text="É por aqui que recebes os códigos de segurança e os avisos de levantamento.">
+    <StepsLayout step={1} title="Confirma o teu telemóvel" text="É por aqui que recebes os códigos de segurança e os avisos de levantamento."
+      foot={<RouteButton disabled={code.length < 6 || checking} onClick={() => check(code)}>Confirmar</RouteButton>}>
       <h1>Código SMS</h1>
       <p className="muted">Enviámos um código de 6 dígitos para <span className="mono">{phone(state.tel || "923481207")}</span>.</p>
       <CodeInput key={key} onComplete={check} error={error} />
@@ -36,7 +37,6 @@ export default function Verify() {
         {left > 0 ? <span className="muted">Reenviar em <span className="mono">{mmss(left)}</span></span> : <button className="link" onClick={() => { setKey((k) => k + 1); setError(false); }}>Reenviar código</button>}
         <button className="link" onClick={() => nav("/auth/registo")}>Mudar número</button>
       </div>
-      <RouteButton disabled={code.length < 6 || checking} onClick={() => check(code)}>Confirmar</RouteButton>
     </StepsLayout>
   );
 }

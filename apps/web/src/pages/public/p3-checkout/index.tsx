@@ -35,7 +35,7 @@ export default function Checkout() {
 
   return (
     <div className="pub ck">
-      <header className="ck-head">
+      <header className="ck-head d-only">
         <Logo />
         <span className="row" style={{ gap: 10, fontSize: 14 }}>
           <span className="avatar" style={{ width: 28, height: 28, background: "var(--verde)", color: "var(--branco)", fontSize: 10 }}>KG</span>

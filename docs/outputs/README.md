@@ -26,6 +26,11 @@ Regra: o streamer escolhe o modo (`OutputMode`). A mesma mensagem nunca toca nas
 
 Estratégia completa: https://claude.ai/artifact/916qoRFhGb3XDAugvVSwaa
 
+## Onde vivem os widgets
+
+Páginas do próprio site em `/o/<token>` (RN-WID-01, ADR 0003). Link copiado em Widgets: `<site>/o/<token>?w=<n>&layout=h|v`.
+Código: `apps/web/o/index.html` → `apps/web/src/overlay/` (sem React). A API vem de `VITE_API_URL` do mesmo build.
+
 ## Protocolo do overlay (WebSocket)
 
 `WS /v1/realtime/overlay?token=<token>&w=<1..6>`
@@ -41,7 +46,7 @@ Overlay → servidor:
 - `{type:"ack", data:{id, playedAt}}` quando o alerta acaba; só então a mensagem passa a "tocada".
 - `{type:"ping"}` a cada 25 s.
 
-Se o som não carregar em 5 s, o texto fica 6 s no ecrã sem som e o overlay envia o `ack` na mesma.
+Se o som não carregar em 5 s, o texto fica 6 s no ecrã sem som e o overlay envia `{type:"error", data:{id, reason:"load_failed"}}`: a mensagem passa a falha técnica (RN-WID-05, RN-REE-01). Alertas de teste confirmam com `ack` na mesma.
 
 ## Endpoints do painel (Widgets)
 

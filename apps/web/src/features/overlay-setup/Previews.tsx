@@ -5,7 +5,7 @@ import type { WidgetId, WidgetTheme } from "./widgets";
 
 /**
  * Pré-visualizações estáticas dos widgets para o painel (sobre fundo transparente em xadrez).
- * O aspeto segue o overlay real (apps/overlay); a versão animada abre-se em "Abrir".
+ * O aspeto segue os widgets reais (apps/web/src/overlay, servidos em /o/<token>); a versão animada abre-se em "Abrir".
  */
 export function AlertCard({ theme = "claro", level = "destaque", name = "Luana", text = "Feliz aniversário DJ Nelo, és o maior!", value = 3000, accent, karaoke = true, showName = true, showValue = true, size = "m", progress = 34 }: {
   theme?: WidgetTheme; level?: "normal" | "destaque" | "super"; name?: string; text?: string; value?: number; accent?: string; karaoke?: boolean; showName?: boolean; showValue?: boolean; size?: "p" | "m" | "g"; progress?: number;
@@ -44,7 +44,7 @@ export function WidgetPreview({ id, theme = "claro", disabled }: { id: WidgetId;
           </div>
         </div>
       )}
-      {id === "w3" && (
+      {id === "w4" && (
         <div className={cx("pv-card", `th-${theme}`)} style={{ width: "60%", fontSize: 11 }}>
           <div className="pv-hd"><span className="brand"><b>Fedha</b> LIVE</span><span className="eyebrow" style={{ color: "rgba(255,255,255,.7)", fontSize: 8 }}>Top 5 · esta live</span></div>
           <div style={{ padding: 6 }}>
@@ -56,7 +56,7 @@ export function WidgetPreview({ id, theme = "claro", disabled }: { id: WidgetId;
           </div>
         </div>
       )}
-      {id === "w4" && (
+      {id === "w3" && (
         <div className="pv-ticker"><span className="lab"><b>Fedha</b> LIVE</span><span className="it"><b>DJ Nelo</b> <em>2.500 Kz</em> Ya mano, essa jogada foi mesmo à Kuduro 😂</span></div>
       )}
       {id === "w5" && (

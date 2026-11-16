@@ -66,6 +66,8 @@ export function connect(cfg: OverlayConfig, l: Listener) {
   const hb = setInterval(() => { if (ws?.readyState === 1) ws.send(JSON.stringify({ type: "ping" })); }, 25000);
   return {
     ack: (id: string) => ws?.readyState === 1 && ws.send(JSON.stringify({ type: "ack", data: { id, playedAt: new Date().toISOString() } })),
+    /** RN-WID-05: o áudio não carregou em 5 s; o texto já foi mostrado 6 s e a mensagem passa a falha técnica. */
+    fail: (id: string, reason: "load_failed" | "autoplay_blocked" | "decode_failed") => ws?.readyState === 1 && ws.send(JSON.stringify({ type: "error", data: { id, reason } })),
     close: () => { closed = true; clearInterval(hb); ws?.close(); },
   };
 }
@@ -112,6 +114,7 @@ function demo(cfg: OverlayConfig, l: Listener) {
       l.onState({ ...state });
       setTimeout(next, cfg.gapMs);
     },
+    fail: (id: string) => { void id; setTimeout(next, cfg.gapMs); },
     close: () => clearTimeout(t),
   };
 }

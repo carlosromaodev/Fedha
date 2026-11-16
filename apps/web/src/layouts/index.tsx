@@ -70,10 +70,20 @@ function Shell({ nav, head, foot, admin = false }: { nav: NavGroup[]; head: Reac
 }
 
 /** Barra de topo: título e subtítulo à esquerda, ações, estado "Ao vivo" e avisos à direita. */
-export function Topbar({ title, sub, children }: { title: string; sub?: ReactNode; children?: ReactNode }) {
+export function Topbar({ title, sub, mtitle, mActions = true, children }: { title: string; sub?: ReactNode; mtitle?: string; mActions?: boolean; children?: ReactNode }) {
   const { open, admin } = useContext(MenuContext);
   const now = new Date().toLocaleTimeString("pt-PT", { hour: "2-digit", minute: "2-digit", timeZone: "Africa/Luanda" });
   return (
+    <>
+    {/* Telemóvel: barra verde com o título, "Ao vivo" e o menu à direita (design mobile 08/23). */}
+    <header className="mbar">
+      <b>{mtitle ?? title}</b>
+      {!admin && streamer.live && <LiveBadge />}
+      <button className="mburger" aria-label="Abrir menu" onClick={open}>
+        <svg width="20" height="14" viewBox="0 0 20 14" aria-hidden><path d="M0 1h20M4 7h16M8 13h12" stroke="currentColor" strokeWidth="2" /></svg>
+      </button>
+    </header>
+    {mActions && children && <div className="m-actions">{children}</div>}
     <header className="topbar">
       <button className="burger" aria-label="Abrir menu" onClick={open}>
         <svg width="20" height="14" viewBox="0 0 20 14" aria-hidden><path d="M0 1h20M0 7h20M0 13h20" stroke="currentColor" strokeWidth="2" /></svg>
@@ -92,6 +102,7 @@ export function Topbar({ title, sub, children }: { title: string; sub?: ReactNod
         </div>
       )}
     </header>
+    </>
   );
 }
 
@@ -132,7 +143,7 @@ export const SIGNUP_STEPS = [
 ] as const;
 
 /** Layout de duas colunas: painel verde com título, texto e passos clicáveis; formulário à direita. */
-export function StepsLayout({ step, title, text, children }: { step?: number; title: ReactNode; text: ReactNode; children: ReactNode }) {
+export function StepsLayout({ step, title, text, foot, headLink, children }: { step?: number; title: ReactNode; text: ReactNode; foot?: ReactNode; headLink?: ReactNode; children: ReactNode }) {
   return (
     <div className="auth">
       <aside className="auth-side">
@@ -153,9 +164,17 @@ export function StepsLayout({ step, title, text, children }: { step?: number; ti
         <span />
       </aside>
       <div className="auth-right">
-        <div className="auth-head"><Logo to="/" />{step !== undefined && <span className="eyebrow" style={{ color: "rgba(255,255,255,.7)" }}>Passo {step + 1} de 5</span>}</div>
-        {step !== undefined && <div className="steps auth-steps-m">{SIGNUP_STEPS.map((s, i) => <i key={s.key} className={i <= step ? "on" : ""} />)}</div>}
-        <main className="auth-main">{children}</main>
+        <div className="auth-head"><Logo to="/" />{headLink}</div>
+        {step !== undefined && (
+          <div className="auth-steps-m">
+            <div className="steps">{SIGNUP_STEPS.map((s, i) => <i key={s.key} className={i <= step ? "on" : ""} />)}</div>
+            <span className="eyebrow">Passo {step + 1} de 5 · {SIGNUP_STEPS[step]!.label}</span>
+          </div>
+        )}
+        <main className="auth-main">
+          {children}
+          {foot && <div className="auth-foot">{foot}</div>}
+        </main>
       </div>
     </div>
   );

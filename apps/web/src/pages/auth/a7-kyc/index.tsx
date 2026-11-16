@@ -48,7 +48,13 @@ export default function Kyc() {
   }
 
   return (
-    <StepsLayout step={4} title="Verifica a tua identidade" text="Obrigatório para levantar dinheiro. Só a equipa de Compliance vê os documentos.">
+    <StepsLayout step={4} title="Verifica a tua identidade" text="Obrigatório para levantar dinheiro. Só a equipa de Compliance vê os documentos."
+      foot={<>
+        <RouteButton disabled={!(allDocs || (kind === "passaporte" && docs.filter((d) => d.key !== "verso").every((d) => d.progress === 100))) || !nifOk || (!!iban && !ibanOk)} onClick={() => setSent(true)}>
+          Enviar para análise
+        </RouteButton>
+        <button className="link" style={{ alignSelf: "center", fontSize: 14 }} onClick={() => nav("/painel")}>Fazer depois</button>
+      </>}>
         <h1>Documentos</h1>
         <div className="seg">
           <button className={kind === "bi" ? "on" : ""} onClick={() => setKind("bi")}>BI</button>
@@ -80,10 +86,6 @@ export default function Kyc() {
         <Field label="IBAN (opcional)" error={iban && !ibanOk ? "IBAN angolano: AO06 seguido de 21 dígitos." : null} ok={ibanOk} hint="Em teu nome. Podes adicionar depois na Carteira.">
           <input className="mono-in" value={iban} onChange={(e) => setIban(e.target.value.toUpperCase())} placeholder="AO06 …" />
         </Field>
-        <RouteButton disabled={!(allDocs || (kind === "passaporte" && docs.filter((d) => d.key !== "verso").every((d) => d.progress === 100))) || !nifOk || (!!iban && !ibanOk)} onClick={() => setSent(true)}>
-          Enviar para análise
-        </RouteButton>
-        <button className="link" style={{ alignSelf: "center", fontSize: 14 }} onClick={() => nav("/painel")}>Fazer depois</button>
     </StepsLayout>
   );
 }

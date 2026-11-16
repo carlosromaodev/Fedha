@@ -20,8 +20,9 @@ apps/
       contracts/  http/  domain/  application/  infra/  tests/
     src/shared/       config, http, errors, database, events, realtime, jobs, money, audit
     src/integrations/ payments (Multicaixa Express, Referência), tts, sms, email, whatsapp, storage
-  overlay/      página leve do overlay (W1–W5), corre horas dentro do OBS, LIVE Studio e PRISM
-  web/          React + Vite
+  web/          React + Vite · um só site no mesmo domínio:
+                página pública, checkout, painel, back-office e widgets W1–W6 em /o/<token>
+                (entrada leve o/index.html → src/overlay, sem React)
     src/pages/  public (P1–P5) · auth (A1–A7) · streamer (S1–S15) · assistant · admin (B1–B11)
     src/features/  src/layouts/  src/shared/  src/app/
 packages/

@@ -17,7 +17,8 @@ export default function ChooseLink() {
   const suggestions = [`${slug}gamer`, `${slug}.ao`, `${slug}_live`].filter((s) => s.length > 3);
 
   return (
-    <StepsLayout step={2} title="Escolhe o teu link" text="É o endereço que partilhas no chat da live. Podes mudá-lo mais tarde.">
+    <StepsLayout step={2} title="Escolhe o teu link" text="É o endereço que partilhas no chat da live. Podes mudá-lo mais tarde."
+      foot={<RouteButton disabled={!!err} onClick={() => nav("/boas-vindas")}>Criar conta</RouteButton>}>
       <h1>O teu link</h1>
       <div>
         <label className={err ? "field erro" : "field ok"}>
@@ -38,7 +39,6 @@ export default function ChooseLink() {
         </div>
         <div className="canhoto" style={{ minWidth: 110 }}><LiveBadge /></div>
       </div>
-      <RouteButton disabled={!!err} onClick={() => nav("/boas-vindas")}>Criar conta</RouteButton>
     </StepsLayout>
   );
 }

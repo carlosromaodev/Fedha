@@ -15,7 +15,7 @@ const BRAND = `<span class="brand"><b>Fedha</b> LIVE</span>`;
  * → pausa final (1 s, super +2 s) → saída (300–500 ms, nunca antes do som acabar).
  * Se o som não carregar em 5 s, o texto fica 6 s sem som e o widget segue.
  */
-export async function playAlert(host: HTMLElement, a: Alert, cfg: OverlayConfig, queueSize: number) {
+export async function playAlert(host: HTMLElement, a: Alert, cfg: OverlayConfig, queueSize: number): Promise<{ played: boolean }> {
   const level = levelOf(a.amountKz, cfg);
   const minimal = cfg.scenario === "c4";
   const el = document.createElement("div");
@@ -105,6 +105,7 @@ export async function playAlert(host: HTMLElement, a: Alert, cfg: OverlayConfig,
   el.classList.add("out");
   await wait(cfg.reduceMotion ? 300 : cfg.exitMs);
   el.remove();
+  return { played: loaded };
 }
 
 /* ------------------------------------------------------------------ W2 · meta */
@@ -123,7 +124,7 @@ export function renderGoal(host: HTMLElement, s: OverlayState, cfg: OverlayConfi
   if (done && prev < 100 && !cfg.reduceMotion) host.firstElementChild?.classList.add("celebrate");
 }
 
-/* ------------------------------------------------------------------ W3 · ranking */
+/* ------------------------------------------------------------------ W4 · top doadores (RF-WID-08) */
 export function renderRanking(host: HTMLElement, s: OverlayState, cfg: OverlayConfig) {
   const n = cfg.scenario === "c1" ? 5 : 3;
   const rows = s.ranking.slice(0, n);
@@ -131,22 +132,22 @@ export function renderRanking(host: HTMLElement, s: OverlayState, cfg: OverlayCo
   const leader = rows[0]!.name;
   const newLeader = host.dataset.leader && host.dataset.leader !== leader;
   host.dataset.leader = leader;
-  host.innerHTML = `<div class="w3 th-${cfg.theme}${newLeader && !cfg.reduceMotion ? " swap" : ""}"><small>Top ${n} · esta live</small>${rows
+  host.innerHTML = `<div class="rank th-${cfg.theme}${newLeader && !cfg.reduceMotion ? " swap" : ""}"><small>Top ${n} · esta live</small>${rows
     .map((r, i) => `<div class="r${i === 0 ? " first" : ""}"><span class="i">${i + 1}</span><span class="n">${esc(r.name)}</span><span class="v">${kz(r.kz)} Kz</span></div>`)
     .join("")}</div>`;
 }
 
-/* ------------------------------------------------------------------ W4 · últimas mensagens */
+/* ------------------------------------------------------------------ W3 · últimas mensagens (RF-WID-08) */
 export function renderLatest(host: HTMLElement, s: OverlayState, cfg: OverlayConfig) {
   if (!s.latest.length) { host.innerHTML = ""; return; }
   if (cfg.scenario === "c1") {
-    host.innerHTML = `<div class="w4 list th-${cfg.theme}">${s.latest
+    host.innerHTML = `<div class="last list th-${cfg.theme}">${s.latest
       .slice(0, 5)
       .map((m, i) => `<div class="row${i === 0 && !cfg.reduceMotion ? " fresh" : ""}"><div class="t"><b>${esc(m.name)}</b><span>${esc(m.text)}</span></div><span class="v">${kz(m.kz)}</span></div>`)
       .join("")}</div>`;
   } else {
     const items = s.latest.map((m) => `<span class="it"><b>${esc(m.name)}</b> <em>${kz(m.kz)} Kz</em> ${esc(m.text)}</span>`).join("");
-    host.innerHTML = `<div class="w4 ticker th-${cfg.theme}"><span class="lab">Últimas</span><div class="belt"><div class="move${cfg.reduceMotion ? " still" : ""}">${items}${items}</div></div></div>`;
+    host.innerHTML = `<div class="last ticker th-${cfg.theme}"><span class="lab">Últimas</span><div class="belt"><div class="move${cfg.reduceMotion ? " still" : ""}">${items}${items}</div></div></div>`;
   }
 }
 

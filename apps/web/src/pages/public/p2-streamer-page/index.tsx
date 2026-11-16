@@ -51,16 +51,18 @@ export default function StreamerPage() {
     nav(`/${streamer.handle}/pagar`);
   };
 
+  const errorCount = [nameError, mode === "text" ? textError : audio.seconds ? null : "sem áudio"].filter(Boolean).length;
   const total = mode === "text" ? price.total : audioPrice + (priority ? pricing.extras.priority : 0);
 
   return (
     <div className="pub sp-wrap">
       <header className="sp-head">
         <Logo />
-        <nav className="row" style={{ gap: 18, fontSize: 14 }}>
-          <a href="/#como" className="hide-m" style={{ color: "var(--branco)", textDecoration: "none" }}>Como funciona</a>
+        <nav className="row d-only" style={{ gap: 18, fontSize: 14 }}>
+          <a href="/#como" style={{ color: "var(--branco)", textDecoration: "none" }}>Como funciona</a>
           <a href="/auth/registo" className="btn ghost-light sm">Sou streamer</a>
         </nav>
+        <span className="row m-only m-who"><span className="avatar" style={{ width: 24, height: 24, fontSize: 9 }}>KG</span><b>{streamer.name}</b>{streamer.live && <i className="live-dot" aria-label="Ao vivo" />}</span>
       </header>
       <div className="sp-grid">
         <section className="sp-profile">
@@ -75,7 +77,7 @@ export default function StreamerPage() {
               </div>
             </div>
           </div>
-          <p className="muted light sp-bio" style={{ marginTop: 12, fontSize: 14, lineHeight: 1.5 }}>{streamer.bio}</p>
+          <p className="muted light sp-bio d-only" style={{ marginTop: 12, fontSize: 14, lineHeight: 1.5 }}>{streamer.bio}</p>
 
           <div className="card verde" style={{ marginTop: 16 }} aria-live="polite">
             <div className="row between">
@@ -89,7 +91,7 @@ export default function StreamerPage() {
               {waiting} na fila · a tua toca em cerca de {Math.max(1, Math.round(waiting * 0.4))} min
             </p>
           </div>
-          <div className="sp-next">
+          <div className="sp-next d-only">
             <span className="eyebrow">A seguir na live</span>
             {queue.filter((q) => q.status === "na_fila").slice(0, 3).map((m, i) => (
               <div key={m.id} className="row" style={{ gap: 12, padding: "14px 16px", fontSize: 14 }}>
@@ -103,6 +105,9 @@ export default function StreamerPage() {
         </section>
 
         <section className="sp-compose stack" style={{ gap: 12 }}>
+          {touched && errorCount > 0 && (
+            <div className="aviso erro" role="alert">Corrige {errorCount} {errorCount > 1 ? "campos" : "campo"} para continuar.</div>
+          )}
           <div className="seg" role="tablist">
             <button role="tab" aria-selected={mode === "text"} className={mode === "text" ? "on" : ""} onClick={() => setMode("text")}>Texto</button>
             <button role="tab" aria-selected={mode === "audio"} className={mode === "audio" ? "on" : ""} onClick={() => setMode("audio")}>Áudio gravado</button>
@@ -122,7 +127,7 @@ export default function StreamerPage() {
                 hint="Links, emails e números de telefone são bloqueados antes de pagares.">
                 <textarea value={text} maxLength={MAX} onChange={(e) => setText(e.target.value)} placeholder="Escreve o que queres que toque na live" />
               </Field>
-              <div>
+              <div className={hit ? "meter-bad" : ""}>
                 <VoiceMeter ratio={text.length / MAX} bars={44} />
                 <div className="sp-tiers">
                   {pricing.text.map((t) => (
@@ -179,11 +184,11 @@ export default function StreamerPage() {
         <div className="row between" style={{ gap: 16 }}>
           <div>
             <small className="muted" style={{ fontSize: 12 }}>
-              {mode === "text"
+              {mode === "text" && hit ? "Mensagem inválida" : mode === "text"
                 ? price.lines.filter((l) => l.kz).map((l) => l.label.split(" · ")[0]).join(" + ") || "Texto a partir de " + kz(500)
                 : `Áudio até ${audioTier} s`}
             </small>
-            <div className="kz" style={{ fontSize: 22 }}>{kz(total)}</div>
+            <div className="kz" style={{ fontSize: 22, color: mode === "text" && hit ? "var(--tinta-3)" : undefined }}>{mode === "text" && hit ? "— Kz" : kz(total)}</div>
           </div>
           <div style={{ width: 170 }}>
             <RouteButton onClick={go} disabled={mode === "text" ? !canText && touched : !canAudio}>Continuar</RouteButton>

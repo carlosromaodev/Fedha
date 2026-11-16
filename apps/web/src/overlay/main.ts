@@ -4,8 +4,9 @@ import { connect, type Alert, type OverlayState } from "./runtime";
 import { playAlert, renderGoal, renderLatest, renderQr, renderRanking } from "./widgets";
 
 /**
- * Overlay Fedha LIVE: uma página leve e transparente que corre horas dentro do OBS, Streamlabs,
- * TikTok LIVE Studio, PRISM ou CameraFi Live. Sem framework, para não pesar nos navegadores embutidos.
+ * Widgets Fedha LIVE (W1–W6) em /o/<token>: página do próprio site (RN-WID-01), leve e transparente (RN-WID-03),
+ * que corre horas dentro do OBS, Streamlabs, TikTok LIVE Studio, PRISM ou CameraFi Live. Sem React, para não pesar
+ * nos navegadores embutidos. Nunca mostra erros na live; os avisos só aparecem na pré-visualização do painel.
  */
 const cfg = readConfig();
 const stage = document.getElementById("stage")!;
@@ -26,8 +27,9 @@ const hasAlert = cfg.widget === 1 || cfg.widget === 6;
 
 function render() {
   if (cfg.widget === 2 || cfg.widget === 6) renderGoal(sideZone, state, cfg);
-  if (cfg.widget === 3) renderRanking(sideZone, state, cfg);
-  if (cfg.widget === 4) renderLatest(sideZone, state, cfg);
+  // RF-WID-08: W3 últimas mensagens, W4 top doadores.
+  if (cfg.widget === 3) renderLatest(sideZone, state, cfg);
+  if (cfg.widget === 4) renderRanking(sideZone, state, cfg);
   if (cfg.widget === 5) renderQr(sideZone, cfg);
 }
 
@@ -59,9 +61,10 @@ async function pump() {
     const a = queue.shift()!;
     // W6: o alerta entra por cima da meta; a meta reage quando ele sai.
     if (cfg.widget === 6) sideZone.classList.add("dim");
-    await playAlert(alertZone, a, cfg, Math.max(state.queueSize, queue.length));
+    const { played } = await playAlert(alertZone, a, cfg, Math.max(state.queueSize, queue.length));
     if (cfg.widget === 6) sideZone.classList.remove("dim");
-    link.ack(a.id);
+    // RF-WID-06: confirmar o fim ao servidor; RN-WID-05: sem áudio, a mensagem fica como falha técnica.
+    if (played || a.isTest) link.ack(a.id); else link.fail(a.id, "load_failed");
     await new Promise((r) => setTimeout(r, cfg.gapMs));
   }
   busy = false;

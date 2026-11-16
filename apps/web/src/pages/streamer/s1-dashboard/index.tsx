@@ -12,12 +12,30 @@ export default function Dashboard() {
   const recent = queue.filter((q) => q.status !== "na_fila").concat(queue.filter((q) => q.status === "na_fila")).slice(0, 4);
   return (
     <>
-      <Topbar title={`Olá, ${streamer.name.split(" ")[0]}`} sub={`${new Date().toLocaleDateString("pt-PT", { weekday: "long", day: "2-digit", month: "2-digit", year: "numeric" })} · hora de Luanda`}>
+      <Topbar mtitle="Painel" mActions={false} title={`Olá, ${streamer.name.split(" ")[0]}`} sub={`${new Date().toLocaleDateString("pt-PT", { weekday: "long", day: "2-digit", month: "2-digit", year: "numeric" })} · hora de Luanda`}>
         <LinkBox />
         <Link className="btn hide-m" to="/painel/player">Abrir Player</Link>
       </Topbar>
       <div className="page">
-        <div className="grid g4">
+        {/* Telemóvel (design mobile 08): resumo 2×2, levantar, meta e as duas últimas mensagens. */}
+        <div className="m-only m-dash">
+          <h1 className="page-h">Olá, {streamer.name.split(" ")[0]}</h1>
+          <div className="m-grid">
+            <Link to="/painel/historico" className="card stat"><div className="eyebrow">Hoje</div><div className="big">{kz(38500)}</div></Link>
+            <Link to="/painel/carteira" className="card stat verde"><div className="eyebrow">Disponível</div><div className="big">{kz(wallet.available)}</div></Link>
+            <Link to="/painel/carteira" className="card stat"><div className="eyebrow">Pendente</div><div className="big">{kz(wallet.pending)}</div></Link>
+            <Link to="/painel/historico" className="card stat"><div className="eyebrow">Semana</div><div className="big">{kz(186000)}</div></Link>
+          </div>
+          <Link to="/painel/carteira" className="btn-route"><span className="label">Levantar</span><span className="dot" /></Link>
+          <Link to="/painel/metas" className="card" style={{ display: "block", color: "inherit", textDecoration: "none" }}>
+            <div className="row between"><b style={{ fontSize: 14 }}>{goal.title}</b><span className="mono muted" style={{ fontSize: 11 }}>{pct}%</span></div>
+            <div className="meter" style={{ marginTop: 10, height: 20 }}>{Array.from({ length: 36 }, (_, i) => <i key={i} className={i < (pct / 100) * 36 ? "on" : ""} style={{ height: `${40 + ((i * 41) % 60)}%` }} />)}</div>
+            <div className="mono" style={{ fontSize: 12, marginTop: 8 }}>{kz(goal.current, false)} / {kz(goal.target)}</div>
+          </Link>
+          {recent.slice(0, 2).map((m) => <Talao key={m.id} name={m.donor} text={m.text} value={m.kz} />)}
+          <div className="m-sticky"><LinkBox mobile /></div>
+        </div>
+        <div className="grid g4 d-only">
           <Stat label="Hoje" value={38500} sub={`21 mensagens · líquido ${kz(34650)}`} />
           <Stat label="Esta semana" value={186000} sub="+12% que a anterior" />
           <Stat label="Disponível" value={wallet.available} tone="verde">
@@ -29,7 +47,7 @@ export default function Dashboard() {
           <Stat label="Pendente · 48 h" value={wallet.pending} sub={`Liberta ${wallet.releaseAt.replace("/2026", "")}`} />
         </div>
 
-        <div className="split" style={{ gridTemplateColumns: "minmax(0,1.5fr) minmax(0,1fr)" }}>
+        <div className="split d-only" style={{ gridTemplateColumns: "minmax(0,1.5fr) minmax(0,1fr)" }}>
           <div className="card pad-l">
             <div className="row between"><h2>Recebido nos últimos 14 dias</h2><span className="mono muted" style={{ fontSize: 12 }}>Total {kz(642300)}</span></div>
             <div className="bars14" style={{ marginTop: 20 }} role="img" aria-label="Receitas por dia nos últimos 14 dias">
@@ -61,8 +79,8 @@ export default function Dashboard() {
           </div>
         </div>
 
-        <div className="row between"><span className="eyebrow">Últimas mensagens</span><Link to="/painel/historico">Ver histórico</Link></div>
-        <div className="grid g2">
+        <div className="row between d-only"><span className="eyebrow">Últimas mensagens</span><Link to="/painel/historico">Ver histórico</Link></div>
+        <div className="grid g2 d-only">
           {recent.map((m) => (
             <Talao key={m.id} name={m.donor} text={m.text} value={m.kz} meta={<span className="mono muted" style={{ fontSize: 12 }}>{m.at}</span>}>
               {m.tags[0] && <Tag>{m.tags[0]}</Tag>}

@@ -24,13 +24,18 @@ export default function LiveQueue({ readOnly = false }: { readOnly?: boolean }) 
   return (
     <>
       {!readOnly && (
-        <Topbar title="Fila ao vivo" sub="Tocam por ordem de chegada; prioridade passa à frente. Não é possível parar mensagens já pagas.">
+        <Topbar mtitle="Fila" mActions={false} title="Fila ao vivo" sub="Tocam por ordem de chegada; prioridade passa à frente. Não é possível parar mensagens já pagas.">
           <LinkBox />
         </Topbar>
       )}
       <div className="page">
         <div className="split">
           <div className="stack" style={{ gap: 12 }}>
+            {/* Telemóvel (design mobile 23): estado do Player e volume numa linha. */}
+            <div className="card row m-only m-row" style={{ gap: 12, padding: "10px 14px" }}>
+              <span className="tag ok">Player ligado</span>
+              <div className="grow"><Volume value={vol} onChange={setVol} /></div>
+            </div>
             {now ? (
               <div className="card verde pad-l" aria-live="polite">
                 <div className="row between">
@@ -64,8 +69,8 @@ export default function LiveQueue({ readOnly = false }: { readOnly?: boolean }) 
               </div>
             ))}
 
-            <span className="eyebrow" style={{ marginTop: 8 }}>Já tocaram</span>
-            <div className="lines" style={{ padding: "0 16px" }}>
+            <span className="eyebrow d-only" style={{ marginTop: 8 }}>Já tocaram</span>
+            <div className="lines d-only" style={{ padding: "0 16px" }}>
               {played.map((m) => (
                 <div key={m.id} className="row" style={{ gap: 16, fontSize: 14 }}>
                   <span className="mono muted" style={{ fontSize: 12 }}>{m.at}</span>
@@ -76,7 +81,7 @@ export default function LiveQueue({ readOnly = false }: { readOnly?: boolean }) 
             </div>
           </div>
 
-          <div className="stack" style={{ gap: 16 }}>
+          <div className="stack d-only" style={{ gap: 16 }}>
             {!readOnly && (
               <div className="grid g2" style={{ gridTemplateColumns: "1fr 1fr" }}>
                 <Stat label="Recebido nesta live" value={38500} sub="21 mensagens" />

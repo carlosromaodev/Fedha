@@ -46,4 +46,4 @@ Uma pasta por tela, com o mesmo código da especificação.
 | B10 | Suporte | `pages/admin/b10-support` |
 | B11 | Administradores e auditoria | `pages/admin/b11-admins-audit` |
 
-Os widgets W1–W5 vivem em `apps/overlay`, não no painel.
+Os widgets W1–W6 são servidos pelo próprio site em `/o/<token>` (entrada `o/index.html`, código em `src/overlay`), sem React.
