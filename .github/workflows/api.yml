@@ -1,0 +1,28 @@
+# RNF-19: typecheck e testes da API obrigatórios antes de juntar ao main.
+name: API
+
+on:
+  pull_request:
+    paths: ["apps/api/**", "packages/contracts/**", "pnpm-lock.yaml", ".github/workflows/api.yml"]
+  push:
+    branches: [main]
+    paths: ["apps/api/**", "packages/contracts/**", "pnpm-lock.yaml", ".github/workflows/api.yml"]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: Typecheck
+        run: pnpm --filter @fedha/api typecheck
+      - name: Testes (preços, filtros, fila, webhook, ledger, widgets)
+        run: pnpm --filter @fedha/api test
